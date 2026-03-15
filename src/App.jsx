@@ -462,7 +462,7 @@ function ChatView({ session, profile }) {
         <div style={{ display:"flex", gap:10, paddingTop:12, borderTop:"1px solid rgba(255,255,255,0.05)" }}>
           <input value={text} onChange={e=>setText(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()}
-            style={{ ...A.inp,flex:1,marginBottom:0 }} placeholder={`Message dans ${rooms.find(r=>r.id===room)?.label}…`}/>
+            style={{ ...A.inp,flex:1,marginBottom:0 }} placeholder={`Message dans ${ROOMS_LIST.find(r=>r.id===room)?.label}…`}/>
           <button onClick={send} disabled={!text.trim()}
             style={{ ...A.btnPrimary,padding:"10px 18px",opacity:text.trim()?1:0.4 }}>Envoyer</button>
         </div>
