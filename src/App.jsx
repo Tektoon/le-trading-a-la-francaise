@@ -370,11 +370,15 @@ function ChatView({ session, profile }) {
   const [messages,setMessages] = useState([]);
   const [text,setText]         = useState("");
   const [loading,setLoading]   = useState(true);
-  const [rooms]                = useState([{ id:"général",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
-  const [room,setRoom]         = useState("général");
+  const ROOMS_LIST = [{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }];
+  const [room,setRoom]         = useState("general");
   const bottomRef              = useRef(null);
+  const roomRef                = useRef("general");
+
+  useEffect(()=>{ roomRef.current = room; },[room]);
 
   const loadMessages = useCallback(async () => {
+    setMessages([]);
     const { data } = await supabase.from("messages")
       .select("*, profiles(username,avatar_color)")
       .eq("room", room)
@@ -388,11 +392,9 @@ function ChatView({ session, profile }) {
   useEffect(()=>{ setLoading(true); loadMessages(); },[loadMessages]);
 
   useEffect(()=>{
-    const ch = supabase.channel(`chat-${room}`)
-      .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages",filter:`room=eq.${room}` }, payload=>{
-        // fetch profile for new message
-        // Vérifier que le message appartient bien au salon actuel
-        if (payload.new.room !== room) return;
+    const ch = supabase.channel(`chat-${room}-${Date.now()}`)
+      .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages" }, payload=>{
+        if (payload.new.room !== roomRef.current) return;
         supabase.from("profiles").select("username,avatar_color").eq("id",payload.new.user_id).single()
           .then(({ data:prof })=>{
             setMessages(m=>[...m,{ ...payload.new,profiles:prof }]);
@@ -415,7 +417,7 @@ function ChatView({ session, profile }) {
       {/* room list */}
       <div style={{ width:160, flexShrink:0, paddingRight:12, borderRight:"1px solid rgba(255,255,255,0.05)" }}>
         <div style={{ fontSize:10,color:"#444",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12,paddingLeft:4 }}>Salons</div>
-        {rooms.map(r=>(
+        {ROOMS_LIST.map(r=>(
           <button key={r.id} onClick={()=>setRoom(r.id)} style={{ ...A.navBtn,width:"100%",marginBottom:2,
             ...(room===r.id?{ background:"rgba(37,99,235,0.12)",color:"#60a5fa" }:{}) }}>
             {r.label}
