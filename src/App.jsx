@@ -391,6 +391,8 @@ function ChatView({ session, profile }) {
     const ch = supabase.channel(`chat-${room}`)
       .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages",filter:`room=eq.${room}` }, payload=>{
         // fetch profile for new message
+        // Vérifier que le message appartient bien au salon actuel
+        if (payload.new.room !== room) return;
         supabase.from("profiles").select("username,avatar_color").eq("id",payload.new.user_id).single()
           .then(({ data:prof })=>{
             setMessages(m=>[...m,{ ...payload.new,profiles:prof }]);
