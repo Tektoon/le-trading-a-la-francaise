@@ -370,8 +370,8 @@ function ChatView({ session, profile }) {
   const [messages,setMessages] = useState([]);
   const [text,setText]         = useState("");
   const [loading,setLoading]   = useState(true);
-  const [rooms]                = useState([{ id:"général",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
-  const [room,setRoom]         = useState("général");
+  const [rooms]                = useState([{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
+  const [room,setRoom]         = useState("general");
   const bottomRef              = useRef(null);
 
   const loadMessages = useCallback(async () => {
