@@ -370,14 +370,14 @@ function ChatView({ session, profile }) {
   const [messages,setMessages] = useState([]);
   const [text,setText]         = useState("");
   const [loading,setLoading]   = useState(true);
-  const [rooms]                = useState([{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
-  const [room,setRoom]         = useState("general");
+  const [rooms]                = useState([{ id:"général",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
+  const [room,setRoom]         = useState("général");
   const bottomRef              = useRef(null);
 
   const loadMessages = useCallback(async () => {
     const { data } = await supabase.from("messages")
       .select("*, profiles(username,avatar_color)")
-      .eq("room", room)
+      .eq("chambre", room)
       .order("created_at",{ ascending:true })
       .limit(80);
     if (data) setMessages(data);
@@ -389,10 +389,10 @@ function ChatView({ session, profile }) {
 
   useEffect(()=>{
     const ch = supabase.channel(`chat-${room}`)
-      .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages",filter:`room=eq.${room}` }, payload=>{
+      .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages",filter:`chambre=eq.${room}` }, payload=>{
         // fetch profile for new message
         // Vérifier que le message appartient bien au salon actuel
-        if (payload.new.room !== room) return;
+        if (payload.new.chambre !== room) return;
         supabase.from("profiles").select("username,avatar_color").eq("id",payload.new.user_id).single()
           .then(({ data:prof })=>{
             setMessages(m=>[...m,{ ...payload.new,profiles:prof }]);
@@ -405,7 +405,7 @@ function ChatView({ session, profile }) {
   const send = async () => {
     const t = text.trim(); if (!t) return;
     setText("");
-    await supabase.from("messages").insert({ user_id:session.user.id, room, content:t });
+    await supabase.from("messages").insert({ user_id:session.user.id, chambre:room, content:t });
   };
 
   const isMe = (msg) => msg.user_id === session.user.id;
