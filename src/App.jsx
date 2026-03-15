@@ -226,7 +226,7 @@ function FeedView({ session, profile }) {
   const [posting,setPosting]     = useState(false);
   const [tab,setTab]             = useState("all"); // all | mine
 
-  const INSTRUMENTS = ["","EUR/USD","GBP/USD","BTC/USD","ETH/USD","SPX500","NAS100","GOLD","DAX","CAC40","OIL"];
+  const INSTRUMENTS = ["","EUR/USD","GBP/USD","BTC/USD","ETH/USD","SPX500","NAS100","GOLD","BUND","CAC40","OIL","DAX","AUTRES"];
   const TIMEFRAMES  = ["","1M","5M","15M","1H","4H","1D","1W"];
   const DIRECTIONS  = ["","LONG","SHORT","NEUTRE"];
 
