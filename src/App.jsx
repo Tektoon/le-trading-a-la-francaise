@@ -226,7 +226,7 @@ function FeedView({ session, profile }) {
   const [posting,setPosting]     = useState(false);
   const [tab,setTab]             = useState("all"); // all | mine
 
-  const INSTRUMENTS = ["","EUR/USD","GBP/USD","BTC/USD","ETH/USD","SPX500","NAS100","GOLD","BUND","CAC40","OIL","DAX","AUTRES"];
+  const INSTRUMENTS = ["","EUR/USD","GBP/USD","BTC/USD","ETH/USD","SPX500","NAS100","GOLD","DAX","CAC40","OIL"];
   const TIMEFRAMES  = ["","1M","5M","15M","1H","4H","1D","1W"];
   const DIRECTIONS  = ["","LONG","SHORT","NEUTRE"];
 
@@ -370,8 +370,8 @@ function ChatView({ session, profile }) {
   const [messages,setMessages] = useState([]);
   const [text,setText]         = useState("");
   const [loading,setLoading]   = useState(true);
-  const [rooms]                = useState([{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
-  const [room,setRoom]         = useState("general");
+  const [rooms]                = useState([{ id:"général",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }]);
+  const [room,setRoom]         = useState("général");
   const bottomRef              = useRef(null);
 
   const loadMessages = useCallback(async () => {
