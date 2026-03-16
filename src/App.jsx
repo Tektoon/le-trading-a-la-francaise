@@ -378,7 +378,6 @@ function ChatView({ session, profile }) {
   useEffect(()=>{ roomRef.current = room; },[room]);
 
   const loadMessages = useCallback(async () => {
-    setMessages([]);
     const { data } = await supabase.from("messages")
       .select("*, profiles(username,avatar_color)")
       .eq("room", room)
@@ -389,7 +388,7 @@ function ChatView({ session, profile }) {
     setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),100);
   },[room]);
 
-  useEffect(()=>{ setLoading(true); loadMessages(); },[loadMessages]);
+  useEffect(()=>{ loadMessages(); },[loadMessages]);
 
   useEffect(()=>{
     const ch = supabase.channel(`chat-${room}-${Date.now()}`)
