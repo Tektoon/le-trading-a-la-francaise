@@ -367,23 +367,26 @@ function FeedView({ session, profile }) {
    CHAT
 ───────────────────────────────────────────── */
 function ChatView({ session, profile }) {
-  const [messages,setMessages] = useState([]);
-  const [text,setText]         = useState("");
-  const [loading,setLoading]   = useState(true);
+  const [allMessages,setAllMessages] = useState({});
+  const [text,setText]               = useState("");
+  const [loading,setLoading]         = useState(true);
   const ROOMS_LIST = [{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }];
-  const [room,setRoom]         = useState("general");
-  const bottomRef              = useRef(null);
-  const roomRef                = useRef("general");
+  const [room,setRoom]               = useState("general");
+  const bottomRef                    = useRef(null);
+  const roomRef                      = useRef("general");
+
+  const messages = allMessages[room] || [];
 
   useEffect(()=>{ roomRef.current = room; },[room]);
 
   const loadMessages = useCallback(async () => {
+    setLoading(true);
     const { data } = await supabase.from("messages")
       .select("*, profiles(username,avatar_color)")
       .eq("room", room)
       .order("created_at",{ ascending:true })
       .limit(80);
-    if (data) setMessages(data);
+    if (data) setAllMessages(prev => ({ ...prev, [room]: data }));
     setLoading(false);
     setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),100);
   },[room]);
@@ -396,7 +399,7 @@ function ChatView({ session, profile }) {
         if (payload.new.room !== roomRef.current) return;
         supabase.from("profiles").select("username,avatar_color").eq("id",payload.new.user_id).single()
           .then(({ data:prof })=>{
-            setMessages(m=>[...m,{ ...payload.new,profiles:prof }]);
+            setAllMessages(prev => ({ ...prev, [roomRef.current]: [...(prev[roomRef.current]||[]), { ...payload.new,profiles:prof }] }));
             setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),50);
           });
       }).subscribe();
