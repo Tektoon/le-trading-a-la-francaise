@@ -1,18 +1,14 @@
-const CACHE_NAME = 'ltaf-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-];
+const CACHE_NAME = 'ltaf-v2';
 
-// Installation — mise en cache des fichiers essentiels
+// Installation — cache minimal
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(['/']))
   );
   self.skipWaiting();
 });
 
-// Activation — suppression des anciens caches
+// Activation — supprime anciens caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -22,28 +18,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — réseau en priorité, cache en fallback
+// Fetch — TOUJOURS le réseau en priorité, cache uniquement si offline
 self.addEventListener('fetch', (event) => {
-  // Ne pas intercepter les requêtes Supabase
-  if (event.request.url.includes('supabase.co')) return;
+  // Laisser passer TOUTES les requêtes API et Supabase
+  if (
+    event.request.url.includes('supabase.co') ||
+    event.request.url.includes('/rest/') ||
+    event.request.url.includes('/auth/') ||
+    event.request.url.includes('/realtime/') ||
+    event.request.method !== 'GET'
+  ) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Mettre en cache les réponses réussies
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        // Cache uniquement les fichiers statiques JS/CSS
+        if (response && response.status === 200) {
+          const url = event.request.url;
+          if (url.includes('.js') || url.includes('.css') || url.includes('.png') || url.includes('.ico')) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
         }
         return response;
       })
       .catch(() => {
-        // Fallback sur le cache si pas de réseau
-        return caches.match(event.request).then((cached) => {
-          if (cached) return cached;
-          // Retourner index.html pour les routes SPA
-          return caches.match('/index.html');
-        });
+        // Offline : retourner depuis le cache
+        return caches.match(event.request) || caches.match('/');
       })
   );
 });
