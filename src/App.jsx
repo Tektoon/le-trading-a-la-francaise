@@ -367,38 +367,38 @@ function FeedView({ session, profile }) {
    CHAT
 ───────────────────────────────────────────── */
 function ChatView({ session, profile }) {
-  const [allMessages,setAllMessages] = useState({});
-  const [text,setText]               = useState("");
-  const [loading,setLoading]         = useState(true);
+  const [messages,setMessages] = useState([]);
+  const [text,setText]         = useState("");
+  const [loading,setLoading]   = useState(true);
   const ROOMS_LIST = [{ id:"general",label:"🇫🇷 Général" },{ id:"analyses",label:"📊 Analyses" },{ id:"scalping",label:"⚡ Scalping" },{ id:"crypto",label:"₿ Crypto" }];
-  const [room,setRoom]               = useState("general");
-  const bottomRef                    = useRef(null);
-  const roomRef                      = useRef("general");
-
-  const messages = allMessages[room] || [];
+  const [room,setRoom]         = useState("general");
+  const bottomRef              = useRef(null);
+  const roomRef                = useRef("general");
 
   useEffect(()=>{ roomRef.current = room; },[room]);
 
-  const loadMessages = useCallback(async () => {
+  const loadMessages = useCallback(async (currentRoom) => {
+    const r = currentRoom || roomRef.current;
     setLoading(true);
     const { data } = await supabase.from("messages")
       .select("*, profiles(username,avatar_color)")
-      .eq("room", room)
+      .eq("room", r)
       .order("created_at",{ ascending:true })
       .limit(80);
-    if (data) setAllMessages(prev => ({ ...prev, [room]: data }));
+    if (data) setMessages(data);
     setLoading(false);
     setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),100);
-  },[room]);
+  },[]);
 
-  useEffect(()=>{ loadMessages(); },[loadMessages]);
+  // Charger à l'arrivée et à chaque changement de salon
+  useEffect(()=>{ loadMessages(room); },[room]);
 
   // Recharger quand l'app revient au premier plan (mobile)
   useEffect(()=>{
-    const onVisible = () => { if (document.visibilityState === "visible") loadMessages(); };
+    const onVisible = () => { if (document.visibilityState === "visible") loadMessages(roomRef.current); };
     document.addEventListener("visibilitychange", onVisible);
     return ()=>document.removeEventListener("visibilitychange", onVisible);
-  },[loadMessages]);
+  },[]);
 
   useEffect(()=>{
     const ch = supabase.channel(`chat-${room}-${Date.now()}`)
@@ -406,7 +406,7 @@ function ChatView({ session, profile }) {
         if (payload.new.room !== roomRef.current) return;
         supabase.from("profiles").select("username,avatar_color").eq("id",payload.new.user_id).single()
           .then(({ data:prof })=>{
-            setAllMessages(prev => ({ ...prev, [roomRef.current]: [...(prev[roomRef.current]||[]), { ...payload.new,profiles:prof }] }));
+            if (payload.new.room === roomRef.current) setMessages(m=>[...m,{ ...payload.new,profiles:prof }]);
             setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),50);
           });
       }).subscribe();
