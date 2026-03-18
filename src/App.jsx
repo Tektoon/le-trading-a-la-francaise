@@ -393,6 +393,13 @@ function ChatView({ session, profile }) {
 
   useEffect(()=>{ loadMessages(); },[loadMessages]);
 
+  // Recharger quand l'app revient au premier plan (mobile)
+  useEffect(()=>{
+    const onVisible = () => { if (document.visibilityState === "visible") loadMessages(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return ()=>document.removeEventListener("visibilitychange", onVisible);
+  },[loadMessages]);
+
   useEffect(()=>{
     const ch = supabase.channel(`chat-${room}-${Date.now()}`)
       .on("postgres_changes",{ event:"INSERT",schema:"public",table:"messages" }, payload=>{
@@ -1101,7 +1108,7 @@ export default function App() {
         </div>
 
         {view==="analyses"    && <FeedView      session={session} profile={profile}/>}
-        {view==="chat"        && <ChatView       session={session} profile={profile}/>}
+        {view==="chat"        && <ChatView       session={session} profile={profile} key="chat"/>}
         {view==="indicateurs" && <IndicateursView session={session}/>}
         {view==="cours"        && <CoursView      session={session} profile={profile}/>}
         {view==="profil"      && <ProfilView     session={session} profile={profile} onProfileUpdate={setProfile}/>}
