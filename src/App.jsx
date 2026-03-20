@@ -380,12 +380,22 @@ function ChatView({ session, profile }) {
   const loadMessages = useCallback(async (currentRoom) => {
     const r = currentRoom || roomRef.current;
     setLoading(true);
-    const { data } = await supabase.from("messages")
-      .select("*, profiles(username,avatar_color)")
+    // Charger les messages
+    const { data: msgs } = await supabase.from("messages")
+      .select("*")
       .eq("room", r)
       .order("created_at",{ ascending:true })
       .limit(80);
-    if (data) setMessages(data);
+    if (!msgs) { setLoading(false); return; }
+    // Charger les profils séparément
+    const userIds = [...new Set(msgs.map(m=>m.user_id))];
+    const { data: profs } = await supabase.from("profiles")
+      .select("id,username,avatar_color")
+      .in("id", userIds);
+    const profMap = {};
+    (profs||[]).forEach(p=>{ profMap[p.id]=p; });
+    const enriched = msgs.map(m=>({ ...m, profiles: profMap[m.user_id]||null }));
+    setMessages(enriched);
     setLoading(false);
     setTimeout(()=>bottomRef.current?.scrollIntoView({ behavior:"smooth" }),100);
   },[]);
