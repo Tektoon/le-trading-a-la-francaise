@@ -620,12 +620,16 @@ function IndicateursView({ session }) {
                 style={{ ...A.inp,height:120,resize:"vertical",marginBottom:12,fontFamily:"'JetBrains Mono','Courier New',monospace",fontSize:12 }} placeholder="//@version=5&#10;indicator('Mon Indicateur', overlay=true)"/>
             </>}
 
-            <label style={A.lbl}>URL image (optionnel)</label>
-            <input value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} style={{ ...A.inp,marginBottom:12 }} placeholder="https://i.imgur.com/..."/>
+            <label style={A.lbl}>Image (optionnel)</label>
+            <UploadBtn label="Uploader une image" accept="image/*"
+              onUploaded={url=>setForm({...form,image_url:url})} uploaded={form.image_url}/>
+            <input value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} style={{ ...A.inp,marginBottom:12 }} placeholder="ou coller un lien https://i.imgur.com/..."/>
 
             {form.type==="Fichier"&&<>
-              <label style={A.lbl}>URL du fichier à télécharger</label>
-              <input value={form.file_url} onChange={e=>setForm({...form,file_url:e.target.value})} style={{ ...A.inp,marginBottom:12 }} placeholder="https://drive.google.com/..."/>
+              <label style={A.lbl}>Fichier à télécharger</label>
+              <UploadBtn label="Uploader un fichier" accept=".pdf,.pine,.txt,.csv,.xlsx,.zip"
+                onUploaded={url=>setForm({...form,file_url:url})} uploaded={form.file_url}/>
+              <input value={form.file_url} onChange={e=>setForm({...form,file_url:e.target.value})} style={{ ...A.inp,marginBottom:12 }} placeholder="ou coller un lien https://drive.google.com/..."/>
             </>}
 
             <button onClick={submit} disabled={posting||!form.name.trim()||!form.description.trim()}
@@ -721,6 +725,45 @@ function ProfilView({ session, profile, onProfileUpdate }) {
           ))
         }
       </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   UPLOAD HELPER
+───────────────────────────────────────────── */
+async function uploadFile(file, folder) {
+  const ext = file.name.split(".").pop();
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { data, error } = await supabase.storage.from("uploads").upload(path, file, { upsert:true });
+  if (error) throw error;
+  const { data:{ publicUrl } } = supabase.storage.from("uploads").getPublicUrl(path);
+  return publicUrl;
+}
+
+function UploadBtn({ label, accept, onUploaded, uploaded }) {
+  const [loading, setLoading] = useState(false);
+  const ref = useRef(null);
+  const handle = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    setLoading(true);
+    try {
+      const url = await uploadFile(file, "cours");
+      onUploaded(url);
+    } catch(err) { alert("Erreur upload: " + err.message); }
+    setLoading(false);
+  };
+  return (
+    <div style={{ marginBottom:12 }}>
+      <input ref={ref} type="file" accept={accept} onChange={handle} style={{ display:"none" }}/>
+      <button type="button" onClick={()=>ref.current.click()}
+        style={{ display:"flex",alignItems:"center",gap:8,padding:"9px 14px",borderRadius:9,
+          background:uploaded?"rgba(34,197,129,0.1)":"rgba(255,255,255,0.04)",
+          border:`1px solid ${uploaded?"rgba(34,197,129,0.4)":"rgba(255,255,255,0.08)"}`,
+          color:uploaded?"#22d3a0":"#bbb",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600 }}>
+        {loading?"Upload en cours…":uploaded?"✓ Fichier uploadé — changer":"📎 "+label}
+      </button>
+      {uploaded&&<div style={{ fontSize:10,color:"#555",marginTop:4,wordBreak:"break-all" }}>{uploaded}</div>}
     </div>
   );
 }
@@ -831,6 +874,17 @@ function CourseDetail({ cours, onClose }) {
           </div>
         )}
 
+        {/* fichier téléchargeable */}
+        {cours.file_url&&(
+          <a href={cours.file_url} target="_blank" rel="noreferrer" download
+            style={{ display:"inline-flex",alignItems:"center",gap:8,marginBottom:16,
+              padding:"10px 16px",borderRadius:9,background:"rgba(37,99,235,0.1)",
+              color:"#60a5fa",border:"1px solid rgba(37,99,235,0.3)",
+              fontSize:13,textDecoration:"none",fontWeight:600 }}>
+            📥 Télécharger le fichier du cours
+          </a>
+        )}
+
         {/* body */}
         <div style={{ fontSize:14,color:"#aaa",lineHeight:1.8,whiteSpace:"pre-wrap" }}>{cours.body}</div>
       </div>
@@ -849,7 +903,7 @@ function CoursView({ session, profile }) {
   const [posting,setPosting]     = useState(false);
   const [form,setForm]           = useState({
     title:"", description:"", body:"", category:"", level:"Débutant",
-    video_url:"", image_url:"", thumbnail_url:""
+    video_url:"", image_url:"", thumbnail_url:"", file_url:""
   });
 
   const isFormateur = profile?.is_formateur || false;
@@ -885,8 +939,9 @@ function CoursView({ session, profile }) {
       video_url: form.video_url||null,
       image_url: form.image_url||null,
       thumbnail_url: form.thumbnail_url||null,
+      file_url: form.file_url||null,
     });
-    setForm({ title:"",description:"",body:"",category:"",level:"Débutant",video_url:"",image_url:"",thumbnail_url:"" });
+    setForm({ title:"",description:"",body:"",category:"",level:"Débutant",video_url:"",image_url:"",thumbnail_url:"",file_url:"" });
     setShowForm(false); setPosting(false); load();
   };
 
@@ -987,9 +1042,16 @@ function CoursView({ session, profile }) {
             <input value={form.video_url} onChange={e=>setForm({...form,video_url:e.target.value})}
               style={{ ...A.inp,marginBottom:12 }} placeholder="https://www.youtube.com/watch?v=…"/>
 
-            <label style={A.lbl}>URL image de couverture (optionnel)</label>
+            <label style={A.lbl}>Image de couverture</label>
+            <UploadBtn label="Uploader une image" accept="image/*"
+              onUploaded={url=>setForm({...form,thumbnail_url:url})} uploaded={form.thumbnail_url}/>
+            <div style={{ marginBottom:4,textAlign:"center",fontSize:11,color:"#444" }}>— ou coller un lien —</div>
             <input value={form.thumbnail_url} onChange={e=>setForm({...form,thumbnail_url:e.target.value})}
-              style={{ ...A.inp,marginBottom:16 }} placeholder="https://i.imgur.com/…"/>
+              style={{ ...A.inp,marginBottom:12 }} placeholder="https://i.imgur.com/…"/>
+
+            <label style={A.lbl}>Fichier à télécharger (PDF, script…)</label>
+            <UploadBtn label="Uploader un fichier" accept=".pdf,.pine,.txt,.csv,.xlsx,.zip"
+              onUploaded={url=>setForm({...form,file_url:url})} uploaded={form.file_url}/>
 
             <button onClick={submit} disabled={posting||!form.title.trim()||!form.body.trim()}
               style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.title.trim()||!form.body.trim())?0.5:1 }}>
