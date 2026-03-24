@@ -233,15 +233,20 @@ function FeedView({ session, profile }) {
   const load = useCallback(async () => {
     setLoading(true);
     let q = supabase.from("analyses")
-      .select("*, profiles(username,avatar_color), likes(user_id)")
+      .select("*, likes(user_id)")
       .order("created_at",{ ascending:false });
     if (filter.instrument) q = q.eq("instrument", filter.instrument);
     if (filter.direction)  q = q.eq("direction",  filter.direction);
     if (tab==="mine") q = q.eq("user_id", session.user.id);
     const { data } = await q;
     if (data) {
+      const userIds = [...new Set(data.map(p=>p.user_id))];
+      const { data: profs } = await supabase.from("profiles").select("id,username,avatar_color").in("id", userIds);
+      const profMap = {};
+      (profs||[]).forEach(p=>{ profMap[p.id]=p; });
       const enriched = data.map(p=>({
         ...p,
+        profiles: profMap[p.user_id]||null,
         like_count:   p.likes?.length||0,
         user_liked:   p.likes?.some(l=>l.user_id===session.user.id)||false,
         comment_count:0,
@@ -559,8 +564,13 @@ function IndicateursView({ session }) {
 
   const load = useCallback(async()=>{
     setLoading(true);
-    const { data } = await supabase.from("indicators").select("*, profiles(username,avatar_color)").order("created_at",{ ascending:false });
-    if (data) setInds(data);
+    const { data: indsData } = await supabase.from("indicators").select("*").order("created_at",{ ascending:false });
+    if (!indsData) { setLoading(false); return; }
+    const userIds = [...new Set(indsData.map(i=>i.user_id))];
+    const { data: profs } = await supabase.from("profiles").select("id,username,avatar_color").in("id", userIds);
+    const profMap = {};
+    (profs||[]).forEach(p=>{ profMap[p.id]=p; });
+    setInds(indsData.map(i=>({ ...i, profiles: profMap[i.user_id]||null })));
     setLoading(false);
   },[]);
 
@@ -910,10 +920,17 @@ function CoursView({ session, profile }) {
 
   const load = useCallback(async()=>{
     setLoading(true);
-    const { data } = await supabase.from("cours")
-      .select("*, profiles(username,avatar_color,is_formateur)")
+    const { data: coursData } = await supabase.from("cours")
+      .select("*")
       .order("created_at",{ ascending:false });
-    if (data) setCours(data);
+    if (!coursData) { setLoading(false); return; }
+    const userIds = [...new Set(coursData.map(c=>c.user_id))];
+    const { data: profs } = await supabase.from("profiles")
+      .select("id,username,avatar_color,is_formateur")
+      .in("id", userIds);
+    const profMap = {};
+    (profs||[]).forEach(p=>{ profMap[p.id]=p; });
+    setCours(coursData.map(c=>({ ...c, profiles: profMap[c.user_id]||null })));
     setLoading(false);
   },[]);
 
