@@ -846,7 +846,7 @@ function CourseCard({ cours, onOpen }) {
   );
 }
 
-function CourseDetail({ cours, onClose }) {
+function CourseDetail({ cours, onClose, onDelete, currentUserId }) {
   return (
     <div style={A.overlay} onClick={onClose}>
       <div style={{ ...A.modal,maxWidth:680,width:"100%" }} onClick={e=>e.stopPropagation()}>
@@ -897,6 +897,18 @@ function CourseDetail({ cours, onClose }) {
 
         {/* body */}
         <div style={{ fontSize:14,color:"#aaa",lineHeight:1.8,whiteSpace:"pre-wrap" }}>{cours.body}</div>
+
+        {/* supprimer si proprio */}
+        {cours.user_id===currentUserId&&(
+          <div style={{ marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.06)" }}>
+            <button onClick={()=>{ if(window.confirm("Supprimer ce cours ?")) onDelete(cours.id); }}
+              style={{ background:"rgba(248,113,113,0.1)",border:"1px solid rgba(248,113,113,0.2)",
+                color:"#f87171",borderRadius:8,padding:"8px 16px",fontSize:12,
+                cursor:"pointer",fontFamily:"inherit",fontWeight:600 }}>
+              🗑 Supprimer ce cours
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1017,7 +1029,7 @@ function CoursView({ session, profile }) {
       }
 
       {/* detail modal */}
-      {selected&&<CourseDetail cours={selected} onClose={()=>setSelected(null)}/>}
+      {selected&&<CourseDetail cours={selected} onClose={()=>setSelected(null)} currentUserId={session.user.id} onDelete={async(id)=>{ await supabase.from("cours").delete().eq("id",id); setSelected(null); load(); }}/>}
 
       {/* create form modal */}
       {showForm&&(
