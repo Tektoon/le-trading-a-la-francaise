@@ -1094,6 +1094,307 @@ function CoursView({ session, profile }) {
 }
 
 /* ─────────────────────────────────────────────
+   STRATÉGIES
+───────────────────────────────────────────── */
+const MARCHES     = ["Forex","Indices","Crypto","Matières premières","Actions","Tous marchés"];
+const STRAT_TYPES = ["Scalping","Day Trading","Swing","Position","Price Action","ICT / SMC","Indicateurs","Autre"];
+const STRAT_TF    = ["1M","5M","15M","1H","4H","1D","1W"];
+
+function StrategieCard({ strat, currentUserId, onLike, onDelete, onOpen }) {
+  const liked = strat.user_liked;
+  const typeColor = { "Scalping":"#f87171","Day Trading":"#fb923c","Swing":"#a3e635","Position":"#60a5fa","Price Action":"#c084fc","ICT / SMC":"#f59e0b" }[strat.type]||"#888";
+  return (
+    <div onClick={()=>onOpen(strat)} style={{ ...A.card, cursor:"pointer", transition:"border-color 0.15s" }}
+      onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(37,99,235,0.4)"}
+      onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
+      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12 }}>
+        <div style={{ display:"flex",gap:10,alignItems:"center" }}>
+          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color}/>
+          <div>
+            <div style={{ fontWeight:700,color:"#f0f0f0",fontSize:14 }}>{strat.profiles?.username||"Anonyme"}</div>
+            <div style={{ fontSize:11,color:"#444",marginTop:2 }}>{timeAgo(strat.created_at)}</div>
+          </div>
+        </div>
+        <div style={{ display:"flex",gap:5,flexWrap:"wrap",justifyContent:"flex-end" }}>
+          {strat.type&&<Tag label={strat.type} color={typeColor}/>}
+          {strat.timeframe&&<Tag label={strat.timeframe} color="#6366f1"/>}
+        </div>
+      </div>
+      <div style={{ fontWeight:700,fontSize:15,color:"#f0f0f0",marginBottom:8 }}>{strat.name}</div>
+      <div style={{ fontSize:13,color:"#777",lineHeight:1.6,marginBottom:12,
+        display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden" }}>
+        {strat.description}
+      </div>
+      {strat.marches?.length>0&&(
+        <div style={{ display:"flex",gap:5,flexWrap:"wrap",marginBottom:12 }}>
+          {strat.marches.map((m,i)=><Tag key={i} label={m} color="#0891b2"/>)}
+        </div>
+      )}
+      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",
+        paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.05)" }}
+        onClick={e=>e.stopPropagation()}>
+        <button onClick={()=>onLike(strat.id, strat.user_liked)}
+          style={{ background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",
+            gap:5,color:liked?"#f87171":"#555",fontSize:13,fontFamily:"inherit",padding:0 }}>
+          <span style={{ fontSize:17 }}>{liked?"♥":"♡"}</span><span>{strat.like_count||0}</span>
+        </button>
+        {strat.user_id===currentUserId&&(
+          <button onClick={()=>onDelete(strat.id)}
+            style={{ background:"none",border:"none",cursor:"pointer",color:"#444",fontSize:12,fontFamily:"inherit",padding:0 }}>
+            Supprimer
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StrategieDetail({ strat, onClose }) {
+  const typeColor = { "Scalping":"#f87171","Day Trading":"#fb923c","Swing":"#a3e635","Position":"#60a5fa","Price Action":"#c084fc","ICT / SMC":"#f59e0b" }[strat.type]||"#888";
+  return (
+    <div style={A.overlay} onClick={onClose}>
+      <div style={{ ...A.modal,maxWidth:660 }} onClick={e=>e.stopPropagation()}>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20 }}>
+          <div style={{ flex:1,paddingRight:16 }}>
+            <div style={{ display:"flex",gap:6,marginBottom:10,flexWrap:"wrap" }}>
+              {strat.type&&<Tag label={strat.type} color={typeColor}/>}
+              {strat.timeframe&&<Tag label={strat.timeframe} color="#6366f1"/>}
+              {strat.marches?.map((m,i)=><Tag key={i} label={m} color="#0891b2"/>)}
+            </div>
+            <div style={{ fontWeight:800,fontSize:20,color:"#f0f0f0" }}>{strat.name}</div>
+          </div>
+          <button onClick={onClose} style={{ background:"none",border:"none",color:"#555",fontSize:24,cursor:"pointer" }}>✕</button>
+        </div>
+
+        <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:18,paddingBottom:18,borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color} size={36}/>
+          <div>
+            <div style={{ fontWeight:700,color:"#e8e8e8",fontSize:13 }}>{strat.profiles?.username}</div>
+            <div style={{ fontSize:11,color:"#444" }}>{timeAgo(strat.created_at)}</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize:13,color:"#888",lineHeight:1.7,marginBottom:20 }}>{strat.description}</div>
+
+        {strat.entry_rules&&(
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:11,color:"#444",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8 }}>Règles d'entrée</div>
+            <div style={{ background:"rgba(34,197,129,0.06)",border:"1px solid rgba(34,197,129,0.2)",borderRadius:10,padding:14,fontSize:13,color:"#aaa",lineHeight:1.7,whiteSpace:"pre-wrap" }}>{strat.entry_rules}</div>
+          </div>
+        )}
+
+        {strat.exit_rules&&(
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:11,color:"#444",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8 }}>Règles de sortie</div>
+            <div style={{ background:"rgba(248,113,113,0.06)",border:"1px solid rgba(248,113,113,0.2)",borderRadius:10,padding:14,fontSize:13,color:"#aaa",lineHeight:1.7,whiteSpace:"pre-wrap" }}>{strat.exit_rules}</div>
+          </div>
+        )}
+
+        {strat.risk_management&&(
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:11,color:"#444",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8 }}>Gestion du risque</div>
+            <div style={{ background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:14,fontSize:13,color:"#aaa",lineHeight:1.7,whiteSpace:"pre-wrap" }}>{strat.risk_management}</div>
+          </div>
+        )}
+
+        {strat.image_url&&(
+          <div style={{ borderRadius:10,overflow:"hidden",marginTop:8 }}>
+            <img src={strat.image_url} alt="" style={{ width:"100%",maxHeight:340,objectFit:"cover",display:"block" }}/>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StrategiesView({ session }) {
+  const [strats,setStrats]       = useState([]);
+  const [loading,setLoading]     = useState(true);
+  const [showForm,setShowForm]   = useState(false);
+  const [selected,setSelected]   = useState(null);
+  const [filterType,setFilterT]  = useState("");
+  const [filterMarch,setFilterM] = useState("");
+  const [search,setSearch]       = useState("");
+  const [posting,setPosting]     = useState(false);
+  const [form,setForm]           = useState({
+    name:"", description:"", type:"Price Action", timeframe:"1H",
+    marches:[], entry_rules:"", exit_rules:"", risk_management:"", image_url:""
+  });
+
+  const load = useCallback(async()=>{
+    setLoading(true);
+    const { data } = await supabase.from("strategies").select("*").order("created_at",{ ascending:false });
+    if (!data) { setLoading(false); return; }
+    const userIds = [...new Set(data.map(s=>s.user_id))];
+    const { data: profs } = await supabase.from("profiles").select("id,username,avatar_color").in("id", userIds);
+    const { data: likes } = await supabase.from("strategy_likes").select("strategy_id,user_id");
+    const profMap = {};
+    (profs||[]).forEach(p=>{ profMap[p.id]=p; });
+    setStrats(data.map(s=>({
+      ...s,
+      profiles: profMap[s.user_id]||null,
+      like_count: (likes||[]).filter(l=>l.strategy_id===s.id).length,
+      user_liked: (likes||[]).some(l=>l.strategy_id===s.id && l.user_id===session.user.id),
+    })));
+    setLoading(false);
+  },[session]);
+
+  useEffect(()=>{ load(); },[load]);
+
+  const filtered = strats.filter(s=>{
+    if (filterType && s.type !== filterType) return false;
+    if (filterMarch && !s.marches?.includes(filterMarch)) return false;
+    if (search && !s.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const toggleLike = async(id, liked) => {
+    if (liked) await supabase.from("strategy_likes").delete().eq("strategy_id",id).eq("user_id",session.user.id);
+    else await supabase.from("strategy_likes").insert({ strategy_id:id, user_id:session.user.id });
+    load();
+  };
+
+  const deleteStat = async(id) => {
+    await supabase.from("strategies").delete().eq("id",id);
+    load();
+  };
+
+  const submit = async() => {
+    if (!form.name.trim()||!form.description.trim()) return;
+    setPosting(true);
+    await supabase.from("strategies").insert({
+      user_id: session.user.id,
+      name: form.name.trim(),
+      description: form.description.trim(),
+      type: form.type||null,
+      timeframe: form.timeframe||null,
+      marches: form.marches.length>0 ? form.marches : null,
+      entry_rules: form.entry_rules||null,
+      exit_rules: form.exit_rules||null,
+      risk_management: form.risk_management||null,
+      image_url: form.image_url||null,
+    });
+    setForm({ name:"",description:"",type:"Price Action",timeframe:"1H",marches:[],entry_rules:"",exit_rules:"",risk_management:"",image_url:"" });
+    setShowForm(false); setPosting(false); load();
+  };
+
+  const toggleMarch = (m) => setForm(f=>({
+    ...f, marches: f.marches.includes(m) ? f.marches.filter(x=>x!==m) : [...f.marches,m]
+  }));
+
+  return (
+    <div>
+      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,gap:10,flexWrap:"wrap" }}>
+        <div style={{ fontSize:13,color:"#555" }}>{filtered.length} stratégie{filtered.length!==1?"s":""}</div>
+        <button onClick={()=>setShowForm(true)} style={A.btnPrimary}>
+          <span style={{ fontSize:18,lineHeight:1 }}>+</span> Partager une stratégie
+        </button>
+      </div>
+
+      <div style={{ display:"flex",gap:8,marginBottom:20,flexWrap:"wrap" }}>
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          style={{ ...A.inp,flex:1,minWidth:180,marginBottom:0 }} placeholder="🔍  Rechercher une stratégie…"/>
+        <select value={filterType} onChange={e=>setFilterT(e.target.value)} style={A.select}>
+          <option value="">Tous types</option>
+          {STRAT_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+        </select>
+        <select value={filterMarch} onChange={e=>setFilterM(e.target.value)} style={A.select}>
+          <option value="">Tous marchés</option>
+          {MARCHES.map(m=><option key={m} value={m}>{m}</option>)}
+        </select>
+        {(filterType||filterMarch||search)&&(
+          <button onClick={()=>{setFilterT("");setFilterM("");setSearch("");}} style={{ ...A.pill,color:"#f87171",borderColor:"rgba(248,113,113,0.3)" }}>✕ Reset</button>
+        )}
+      </div>
+
+      {loading ? <div style={{ color:"#555",textAlign:"center",padding:40 }}>Chargement…</div>
+        : filtered.length===0
+          ? <div style={{ textAlign:"center",padding:"60px 20px",color:"#3a3a3a" }}>
+              <div style={{ fontSize:40,marginBottom:12 }}>🎯</div>
+              <div style={{ fontSize:14 }}>{strats.length===0?"Aucune stratégie partagée. Sois le premier !":"Aucune stratégie pour ces filtres."}</div>
+            </div>
+          : <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16 }}>
+              {filtered.map(s=><StrategieCard key={s.id} strat={s} currentUserId={session.user.id} onLike={toggleLike} onDelete={deleteStat} onOpen={setSelected}/>)}
+            </div>
+      }
+
+      {selected&&<StrategieDetail strat={selected} onClose={()=>setSelected(null)}/>}
+
+      {showForm&&(
+        <div style={A.overlay} onClick={()=>setShowForm(false)}>
+          <div style={{ ...A.modal,maxWidth:620 }} onClick={e=>e.stopPropagation()}>
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+              <div style={{ fontWeight:800,fontSize:18,color:"#f0f0f0" }}>Partager une stratégie</div>
+              <button onClick={()=>setShowForm(false)} style={{ background:"none",border:"none",color:"#555",fontSize:22,cursor:"pointer" }}>✕</button>
+            </div>
+
+            <label style={A.lbl}>Nom de la stratégie *</label>
+            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}
+              style={{ ...A.inp,marginBottom:12 }} placeholder="ex: Breakout sur niveaux clés H4"/>
+
+            <label style={A.lbl}>Description *</label>
+            <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}
+              style={{ ...A.inp,height:80,resize:"vertical",marginBottom:12 }} placeholder="Résume ta stratégie en quelques phrases…"/>
+
+            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12 }}>
+              <div>
+                <label style={A.lbl}>Type</label>
+                <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})} style={A.inp}>
+                  {STRAT_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={A.lbl}>Timeframe principal</label>
+                <select value={form.timeframe} onChange={e=>setForm({...form,timeframe:e.target.value})} style={A.inp}>
+                  {STRAT_TF.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <label style={A.lbl}>Marchés</label>
+            <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:12 }}>
+              {MARCHES.map(m=>(
+                <button key={m} type="button" onClick={()=>toggleMarch(m)}
+                  style={{ padding:"5px 12px",borderRadius:99,fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                    background:form.marches.includes(m)?"rgba(8,145,178,0.2)":"rgba(255,255,255,0.04)",
+                    border:`1px solid ${form.marches.includes(m)?"rgba(8,145,178,0.5)":"rgba(255,255,255,0.08)"}`,
+                    color:form.marches.includes(m)?"#0891b2":"#777" }}>{m}</button>
+              ))}
+            </div>
+
+            <label style={A.lbl}>Règles d'entrée</label>
+            <textarea value={form.entry_rules} onChange={e=>setForm({...form,entry_rules:e.target.value})}
+              style={{ ...A.inp,height:80,resize:"vertical",marginBottom:12 }}
+              placeholder="Quand entres-tu en position ? Quels sont tes critères ?"/>
+
+            <label style={A.lbl}>Règles de sortie</label>
+            <textarea value={form.exit_rules} onChange={e=>setForm({...form,exit_rules:e.target.value})}
+              style={{ ...A.inp,height:80,resize:"vertical",marginBottom:12 }}
+              placeholder="TP, SL, trailing stop, sortie partielle…"/>
+
+            <label style={A.lbl}>Gestion du risque</label>
+            <textarea value={form.risk_management} onChange={e=>setForm({...form,risk_management:e.target.value})}
+              style={{ ...A.inp,height:60,resize:"vertical",marginBottom:12 }}
+              placeholder="% du capital par trade, ratio R/R…"/>
+
+            <label style={A.lbl}>Image / capture d'écran (optionnel)</label>
+            <UploadBtn label="Uploader une image" accept="image/*"
+              onUploaded={url=>setForm({...form,image_url:url})} uploaded={form.image_url}/>
+            <input value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})}
+              style={{ ...A.inp,marginBottom:16 }} placeholder="ou coller un lien…"/>
+
+            <button onClick={submit} disabled={posting||!form.name.trim()||!form.description.trim()}
+              style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.name.trim()||!form.description.trim())?0.5:1 }}>
+              {posting?"Publication…":"Partager la stratégie"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    MAIN APP
 ───────────────────────────────────────────── */
 export default function App() {
@@ -1122,6 +1423,7 @@ export default function App() {
     { id:"chat",        icon:"💬", label:"Chat"         },
     { id:"indicateurs", icon:"📐", label:"Indicateurs" },
     { id:"cours",       icon:"🎓", label:"Cours"        },
+    { id:"strategies",  icon:"🎯", label:"Stratégies"  },
     { id:"profil",      icon:"👤", label:"Mon Profil"  },
   ];
 
@@ -1212,6 +1514,7 @@ export default function App() {
         {view==="chat"        && <ChatView       session={session} profile={profile} key="chat"/>}
         {view==="indicateurs" && <IndicateursView session={session}/>}
         {view==="cours"        && <CoursView      session={session} profile={profile}/>}
+        {view==="strategies"  && <StrategiesView session={session}/>}
         {view==="profil"      && <ProfilView     session={session} profile={profile} onProfileUpdate={setProfile}/>}
       </main>
 
