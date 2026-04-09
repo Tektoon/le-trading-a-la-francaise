@@ -14,19 +14,28 @@ const timeAgo = (ts) => {
 
 const ACCENT   = "#2563eb";
 const TRICOLOR = ["#002395","#FFFFFF","#ED2939"];
-const AVATAR_COLORS = ["#2563eb","#16a34a","#dc2626","#9333ea","#ea580c","#0891b2"];
+const AVATAR_COLORS = ["#c9a227","#0891b2","#dc2626","#9333ea","#16a34a","#ea580c"];
 
 const avatarColor = (name) => AVATAR_COLORS[(name||"?").charCodeAt(0) % AVATAR_COLORS.length];
 
 /* ─────────────────────────────────────────────
    TINY SHARED COMPONENTS
 ───────────────────────────────────────────── */
-function Avatar({ username, size=38, color }) {
+function Avatar({ username, size=38, color, avatarUrl }) {
   const c = color || avatarColor(username);
+  if (avatarUrl) {
+    return (
+      <div style={{ width:size, height:size, borderRadius:"50%", overflow:"hidden",
+        border:`2px solid ${c}55`, flexShrink:0 }}>
+        <img src={avatarUrl} alt={username} style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
+      </div>
+    );
+  }
   return (
-    <div style={{ width:size, height:size, borderRadius:"50%", background:`${c}22`,
-      border:`2px solid ${c}55`, display:"flex", alignItems:"center", justifyContent:"center",
-      fontSize:size*0.4, fontWeight:700, color:c, flexShrink:0, fontFamily:"Inter,sans-serif" }}>
+    <div style={{ width:size, height:size, borderRadius:2, background:`${c}18`,
+      border:`1px solid ${c}40`, display:"flex", alignItems:"center", justifyContent:"center",
+      fontSize:size*0.38, fontWeight:700, color:c, flexShrink:0,
+      fontFamily:"'Playfair Display',serif", letterSpacing:"-0.5px" }}>
       {(username||"?")[0].toUpperCase()}
     </div>
   );
@@ -40,22 +49,23 @@ function FlagStripe() {
   );
 }
 
-function Tag({ label, color="#2563eb" }) {
+function Tag({ label, color="#c9a227" }) {
   return (
-    <span style={{ padding:"2px 9px", borderRadius:99, fontSize:11, fontWeight:600,
-      background:`${color}18`, color, border:`1px solid ${color}35`, fontFamily:"Inter,sans-serif" }}>
+    <span style={{ padding:"2px 10px", borderRadius:2, fontSize:10, fontWeight:600,
+      background:`${color}14`, color, border:`1px solid ${color}30`,
+      fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.05em", textTransform:"uppercase" }}>
       {label}
     </span>
   );
 }
 
 function Spinner() {
-  return <div style={{ color:"#555", textAlign:"center", padding:40, fontSize:13 }}>Chargement…</div>;
+  return <div style={{ color:"#3a3020", textAlign:"center", padding:40, fontSize:12, letterSpacing:"0.15em", textTransform:"uppercase", fontFamily:"'DM Sans',sans-serif" }}>Chargement…</div>;
 }
 
 function EmptyState({ icon, text }) {
   return (
-    <div style={{ textAlign:"center", padding:"60px 20px", color:"#3a3a3a" }}>
+    <div style={{ textAlign:"center", padding:"60px 20px", color:"#3a3020" }}>
       <div style={{ fontSize:40, marginBottom:12 }}>{icon}</div>
       <div style={{ fontSize:14 }}>{text}</div>
     </div>
@@ -95,24 +105,26 @@ function AuthScreen() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"#060810", display:"flex", alignItems:"center",
-      justifyContent:"center", fontFamily:"Inter,sans-serif", padding:16 }}>
-      <div style={{ position:"fixed", inset:0, backgroundImage:"radial-gradient(ellipse at 30% 20%, rgba(37,99,235,0.07) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(237,41,57,0.05) 0%, transparent 60%)", pointerEvents:"none" }}/>
+    <div style={{ minHeight:"100vh", background:"#050508", display:"flex", alignItems:"center",
+      justifyContent:"center", fontFamily:"'DM Sans',sans-serif", padding:16 }}>
+      <div style={{ position:"fixed", inset:0, backgroundImage:"radial-gradient(ellipse at 20% 50%, rgba(201,162,39,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,35,149,0.05) 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, rgba(237,41,57,0.04) 0%, transparent 50%)", pointerEvents:"none" }}/>
       <div style={{ width:"100%", maxWidth:420, position:"relative" }}>
         {/* Logo */}
-        <div style={{ textAlign:"center", marginBottom:44 }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:12, marginBottom:16 }}>
-            <div style={{ width:52, height:52, borderRadius:14, background:"linear-gradient(135deg,#002395,#ED2939)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:26 }}>🇫🇷</div>
-            <div style={{ textAlign:"left" }}>
-              <div style={{ fontSize:20, fontWeight:900, color:"#f0f0f0", letterSpacing:"-0.5px", lineHeight:1.1 }}>Le Trading</div>
-              <div style={{ fontSize:20, fontWeight:900, color:"#f0f0f0", letterSpacing:"-0.5px", lineHeight:1.1 }}>à la Française</div>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontSize:10, color:"#3a3020", letterSpacing:"0.25em", textTransform:"uppercase", marginBottom:16, fontFamily:"'DM Sans',sans-serif" }}>La Communauté des Traders Français</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:32, color:"#e8dcc8", lineHeight:1.1, letterSpacing:"-0.5px" }}>
+              Le Trading
+            </div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontWeight:400, fontStyle:"italic", fontSize:32, color:"#c9a227", lineHeight:1.1, letterSpacing:"-0.5px", marginBottom:16 }}>
+              à la Française
             </div>
           </div>
-          <div style={{ fontSize:12, color:"#3a3a3a", letterSpacing:"0.15em", textTransform:"uppercase" }}>La communauté des traders français</div>
+          <div className="tricolor-bar" style={{ width:80, margin:"0 auto", opacity:0.6 }}/>
         </div>
 
-        <div style={A.card}>
-          <div style={{ fontWeight:700, fontSize:16, color:"#f0f0f0", marginBottom:24, textAlign:"center" }}>
+        <div className="ltaf-card" style={A.card}>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontWeight:400, fontSize:18, color:"#e8dcc8", marginBottom:24, textAlign:"center" }}>
             {mode==="login"?"Connexion":mode==="signup"?"Créer un compte":"Mot de passe oublié"}
           </div>
           {mode==="signup"&&<><label style={A.lbl}>Pseudo</label><input value={pseudo} onChange={e=>setPseudo(e.target.value)} style={{ ...A.inp,marginBottom:12 }} placeholder="ex: TradeurParis"/></>}
@@ -120,7 +132,7 @@ function AuthScreen() {
           <input type="email" value={email} onChange={e=>setEmail(e.target.value)} style={{ ...A.inp,marginBottom:12 }} placeholder="toi@email.com" onKeyDown={e=>e.key==="Enter"&&handle()}/>
           {mode!=="reset"&&<><label style={A.lbl}>Mot de passe</label><input type="password" value={pass} onChange={e=>setPass(e.target.value)} style={{ ...A.inp,marginBottom:16 }} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&handle()}/></>}
           {msg&&<div style={{ padding:"10px 12px",borderRadius:8,marginBottom:14,fontSize:12,background:msg.ok?"rgba(37,99,235,0.1)":"rgba(237,41,57,0.1)",color:msg.ok?"#60a5fa":"#f87171",border:`1px solid ${msg.ok?"rgba(37,99,235,0.3)":"rgba(237,41,57,0.3)"}` }}>{msg.text}</div>}
-          <button onClick={handle} disabled={loading} style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:loading?0.6:1 }}>
+          <button onClick={handle} disabled={loading} className="btn-primary" style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:loading?0.6:1,marginTop:4 }}>
             {loading?"…":mode==="login"?"Se connecter":mode==="signup"?"Créer mon compte":"Envoyer"}
           </button>
           <div style={{ display:"flex",flexDirection:"column",gap:10,marginTop:18,textAlign:"center" }}>
@@ -143,13 +155,13 @@ function AnalyseCard({ post, currentUserId, onLike, onDelete }) {
   const dirColor = post.direction==="LONG"?"#16a34a":post.direction==="SHORT"?"#dc2626":"#555";
 
   return (
-    <div style={A.card}>
+    <div className="ltaf-card" style={A.card}>
       {/* header */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <Avatar username={post.profiles?.username} color={post.profiles?.avatar_color}/>
+          <Avatar username={post.profiles?.username} color={post.profiles?.avatar_color} avatarUrl={post.profiles?.avatar_url}/>
           <div>
-            <div style={{ fontWeight:700, color:"#e8e8e8", fontSize:14 }}>{post.profiles?.username||"Anonyme"}</div>
+            <div style={{ fontWeight:600, color:"#c8b878", fontSize:13, fontFamily:"'DM Sans',sans-serif" }}>{post.profiles?.username||"Anonyme"}</div>
             <div style={{ fontSize:11, color:"#444", marginTop:2 }}>{timeAgo(post.created_at)}</div>
           </div>
         </div>
@@ -161,10 +173,10 @@ function AnalyseCard({ post, currentUserId, onLike, onDelete }) {
       </div>
 
       {/* title */}
-      <div style={{ fontWeight:700, fontSize:16, color:"#f0f0f0", marginBottom:8, lineHeight:1.4 }}>{post.title}</div>
+      <div style={{ fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:17, color:"#e8dcc8", marginBottom:10, lineHeight:1.4 }}>{post.title}</div>
 
       {/* body */}
-      <div style={{ fontSize:13, color:"#888", lineHeight:1.7, marginBottom:12,
+      <div style={{ fontSize:13, color:"#5a5040", lineHeight:1.8, marginBottom:12,
         maxHeight: showFull?"none":"80px", overflow:"hidden", position:"relative" }}>
         {post.body}
         {!showFull&&post.body?.length>200&&(
@@ -199,7 +211,7 @@ function AnalyseCard({ post, currentUserId, onLike, onDelete }) {
         <div style={{ display:"flex", gap:16 }}>
           <button onClick={()=>onLike(post.id, post.user_liked)}
             style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center",
-              gap:5, color:post.user_liked?"#f87171":"#555", fontSize:13, fontFamily:"inherit", padding:0 }}>
+              gap:5, color:post.user_liked?"#c9a227":"#3a3020", fontSize:13, fontFamily:"inherit", padding:0 }}>
             <span style={{ fontSize:17 }}>{post.user_liked?"♥":"♡"}</span>
             <span>{post.like_count||0}</span>
           </button>
@@ -296,7 +308,7 @@ function FeedView({ session, profile }) {
             </button>
           ))}
         </div>
-        <button onClick={()=>setShowForm(true)} style={A.btnPrimary}>
+        <button onClick={()=>setShowForm(true)} className="btn-primary" style={A.btnPrimary}>
           <span style={{ fontSize:18,lineHeight:1 }}>+</span> Publier une analyse
         </button>
       </div>
@@ -358,7 +370,7 @@ function FeedView({ session, profile }) {
               style={{ ...A.inp,height:80,resize:"vertical",marginBottom:16,fontFamily:"'JetBrains Mono','Courier New',monospace",fontSize:12 }} placeholder="//@version=5&#10;indicator(...)"/>
 
             <button onClick={submitPost} disabled={posting||!form.title.trim()||!form.body.trim()}
-              style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.title.trim()||!form.body.trim())?0.5:1 }}>
+              className="btn-primary" style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.title.trim()||!form.body.trim())?0.5:1 }}>
               {posting?"Publication…":"Publier l'analyse"}
             </button>
           </div>
@@ -395,7 +407,7 @@ function ChatView({ session, profile }) {
     // Charger les profils séparément
     const userIds = [...new Set(msgs.map(m=>m.user_id))];
     const { data: profs } = await supabase.from("profiles")
-      .select("id,username,avatar_color")
+      .select("id,username,avatar_color,avatar_url")
       .in("id", userIds);
     const profMap = {};
     (profs||[]).forEach(p=>{ profMap[p.id]=p; });
@@ -439,18 +451,18 @@ function ChatView({ session, profile }) {
   return (
     <div style={{ display:"flex", gap:0, height:"calc(100vh - 80px)" }}>
       {/* room list */}
-      <div style={{ width:160, flexShrink:0, paddingRight:12, borderRight:"1px solid rgba(255,255,255,0.05)" }}>
-        <div style={{ fontSize:10,color:"#444",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12,paddingLeft:4 }}>Salons</div>
+      <div style={{ width:160, flexShrink:0, paddingRight:14, borderRight:"1px solid rgba(212,175,55,0.08)" }}>
+        <div style={{ fontSize:9,color:"#3a3020",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:14,paddingLeft:4,fontFamily:"'DM Sans',sans-serif",fontWeight:600 }}>Salons</div>
         {ROOMS_LIST.map(r=>(
           <button key={r.id} onClick={()=>setRoom(r.id)} style={{ ...A.navBtn,width:"100%",marginBottom:2,
-            ...(room===r.id?{ background:"rgba(37,99,235,0.12)",color:"#60a5fa" }:{}) }}>
+            ...(room===r.id?{ background:"rgba(201,162,39,0.08)",color:"#c9a227",borderLeft:"2px solid #c9a227" }:{}) }}>
             {r.label}
           </button>
         ))}
       </div>
 
       {/* messages */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", paddingLeft:16 }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", paddingLeft:18 }}>
         <div style={{ flex:1, overflowY:"auto", paddingBottom:8 }}>
           {loading ? <Spinner/> : messages.length===0
             ? <EmptyState icon="💬" text="Aucun message. Lance la conversation !"/>
@@ -462,15 +474,15 @@ function ChatView({ session, profile }) {
                     marginBottom:3, alignItems:"flex-end", gap:8 }}>
                     {!me&&(
                       <div style={{ width:30, flexShrink:0 }}>
-                        {showAvatar&&<Avatar username={msg.profiles?.username} color={msg.profiles?.avatar_color} size={30}/>}
+                        {showAvatar&&<Avatar username={msg.profiles?.username} color={msg.profiles?.avatar_color} size={30} avatarUrl={msg.profiles?.avatar_url}/>}
                       </div>
                     )}
                     <div style={{ maxWidth:"72%" }}>
                       {!me&&showAvatar&&<div style={{ fontSize:11,color:"#555",marginBottom:3,paddingLeft:2 }}>{msg.profiles?.username||"Anonyme"}</div>}
                       <div style={{ padding:"9px 13px", borderRadius: me?"14px 14px 4px 14px":"14px 14px 14px 4px",
-                        background: me?"#1d4ed8":"#151820",
-                        color: me?"#fff":"#d0d0d0", fontSize:13, lineHeight:1.5,
-                        border: me?"none":"1px solid rgba(255,255,255,0.06)" }}>
+                        background: me?"linear-gradient(135deg,#b8911f,#d4a830)":"#0d0e14",
+                        color: me?"#0a0a0f":"#9a8a6a", fontSize:13, lineHeight:1.6,
+                        border: me?"none":"1px solid rgba(212,175,55,0.1)" }}>
                         {msg.content}
                       </div>
                       <div style={{ fontSize:10,color:"#333",marginTop:3,textAlign:me?"right":"left",paddingLeft:2 }}>{timeAgo(msg.created_at)}</div>
@@ -483,12 +495,12 @@ function ChatView({ session, profile }) {
         </div>
 
         {/* input */}
-        <div style={{ display:"flex", gap:10, paddingTop:12, borderTop:"1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ display:"flex", gap:10, paddingTop:14, borderTop:"1px solid rgba(212,175,55,0.08)" }}>
           <input value={text} onChange={e=>setText(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()}
             style={{ ...A.inp,flex:1,marginBottom:0 }} placeholder={`Message dans ${ROOMS_LIST.find(r=>r.id===room)?.label}…`}/>
           <button onClick={send} disabled={!text.trim()}
-            style={{ ...A.btnPrimary,padding:"10px 18px",opacity:text.trim()?1:0.4 }}>Envoyer</button>
+            className="btn-primary" className="btn-primary" style={{ ...A.btnPrimary,padding:"10px 18px",opacity:text.trim()?1:0.4 }}>Envoyer</button>
         </div>
       </div>
     </div>
@@ -505,10 +517,10 @@ function IndicatorCard({ ind, currentUserId, onDelete }) {
   const c = typeColors[ind.type]||"#888";
 
   return (
-    <div style={A.card}>
+    <div className="ltaf-card" style={A.card}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <Avatar username={ind.profiles?.username} color={ind.profiles?.avatar_color}/>
+          <Avatar username={ind.profiles?.username} color={ind.profiles?.avatar_color} avatarUrl={ind.profiles?.avatar_url}/>
           <div>
             <div style={{ fontWeight:700,fontSize:14,color:"#f0f0f0" }}>{ind.name}</div>
             <div style={{ fontSize:11,color:"#444",marginTop:2 }}>{ind.profiles?.username} · {timeAgo(ind.created_at)}</div>
@@ -590,7 +602,7 @@ function IndicateursView({ session }) {
     <div>
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
         <div style={{ fontSize:13,color:"#555" }}>{inds.length} indicateur{inds.length!==1?"s":""} partagé{inds.length!==1?"s":""}</div>
-        <button onClick={()=>setShow(true)} style={A.btnPrimary}><span style={{ fontSize:18,lineHeight:1 }}>+</span> Partager un indicateur</button>
+        <button onClick={()=>setShow(true)} className="btn-primary" style={A.btnPrimary}><span style={{ fontSize:18,lineHeight:1 }}>+</span> Partager un indicateur</button>
       </div>
 
       {loading?<Spinner/>:inds.length===0
@@ -643,7 +655,7 @@ function IndicateursView({ session }) {
             </>}
 
             <button onClick={submit} disabled={posting||!form.name.trim()||!form.description.trim()}
-              style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.name.trim()||!form.description.trim())?0.5:1 }}>
+              className="btn-primary" style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.name.trim()||!form.description.trim())?0.5:1 }}>
               {posting?"Publication…":"Partager l'indicateur"}
             </button>
           </div>
@@ -657,12 +669,14 @@ function IndicateursView({ session }) {
    PROFIL
 ───────────────────────────────────────────── */
 function ProfilView({ session, profile, onProfileUpdate }) {
-  const [editing,setEdit]   = useState(false);
-  const [bio,setBio]        = useState(profile?.bio||"");
-  const [pseudo,setPseudo]  = useState(profile?.username||"");
-  const [saving,setSaving]  = useState(false);
-  const [myPosts,setMyPosts]= useState([]);
-  const [stats,setStats]    = useState({ analyses:0,indicators:0,likes:0 });
+  const [editing,setEdit]       = useState(false);
+  const [bio,setBio]            = useState(profile?.bio||"");
+  const [pseudo,setPseudo]      = useState(profile?.username||"");
+  const [saving,setSaving]      = useState(false);
+  const [myPosts,setMyPosts]    = useState([]);
+  const [stats,setStats]        = useState({ analyses:0,indicators:0,likes:0 });
+  const [uploadingAvatar,setUA] = useState(false);
+  const avatarInputRef          = useRef(null);
 
   useEffect(()=>{
     supabase.from("analyses").select("id,title,created_at,likes(id)").eq("user_id",session.user.id).order("created_at",{ ascending:false }).limit(5)
@@ -673,62 +687,117 @@ function ProfilView({ session, profile, onProfileUpdate }) {
 
   const save = async () => {
     setSaving(true);
-    await supabase.from("profiles").update({ username:pseudo.trim(),bio }).eq("id",session.user.id);
-    setSaving(false); setEdit(false); onProfileUpdate({ ...profile,username:pseudo.trim(),bio });
+    await supabase.from("profiles").update({ username:pseudo.trim(), bio }).eq("id",session.user.id);
+    setSaving(false); setEdit(false); onProfileUpdate({ ...profile, username:pseudo.trim(), bio });
   };
 
-  const c = profile?.avatar_color||avatarColor(profile?.username);
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUA(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${session.user.id}/avatar.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert:true });
+      if (error) throw error;
+      const { data:{ publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", session.user.id);
+      onProfileUpdate({ ...profile, avatar_url: publicUrl });
+    } catch(err) { alert("Erreur upload: " + err.message); }
+    setUA(false);
+  };
+
+  const c = profile?.avatar_color || avatarColor(profile?.username);
 
   return (
     <div>
       {/* profile card */}
-      <div style={{ ...A.card,marginBottom:20 }}>
-        <div style={{ display:"flex",gap:16,alignItems:"flex-start",marginBottom:20 }}>
-          <div style={{ width:72,height:72,borderRadius:"50%",background:`${c}22`,border:`3px solid ${c}55`,
-            display:"flex",alignItems:"center",justifyContent:"center",fontSize:30,fontWeight:700,color:c,flexShrink:0 }}>
-            {(profile?.username||"?")[0].toUpperCase()}
-          </div>
-          <div style={{ flex:1 }}>
-            {editing?(
-              <input value={pseudo} onChange={e=>setPseudo(e.target.value)} style={{ ...A.inp,marginBottom:8,fontSize:18,fontWeight:700 }}/>
-            ):(
-              <div style={{ fontSize:20,fontWeight:800,color:"#f0f0f0",marginBottom:4 }}>{profile?.username}</div>
+      <div className="ltaf-card" style={{ ...A.card, marginBottom:20 }}>
+        <div style={{ display:"flex", gap:18, alignItems:"flex-start", marginBottom:20 }}>
+
+          {/* Avatar + upload button */}
+          <div style={{ position:"relative", flexShrink:0 }}>
+            {profile?.avatar_url ? (
+              <div style={{ width:80, height:80, borderRadius:"50%", overflow:"hidden",
+                border:`3px solid ${c}55` }}>
+                <img src={profile.avatar_url} alt="avatar"
+                  style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
+              </div>
+            ) : (
+              <div style={{ width:80, height:80, borderRadius:"50%", background:`${c}22`,
+                border:`3px solid ${c}55`, display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:32, fontWeight:700, color:c }}>
+                {(profile?.username||"?")[0].toUpperCase()}
+              </div>
             )}
-            <div style={{ fontSize:12,color:"#444" }}>{session.user.email}</div>
+            {/* Upload overlay button */}
+            <button onClick={()=>avatarInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              style={{ position:"absolute", bottom:0, right:0, width:26, height:26,
+                borderRadius:"50%", background:"#1d4ed8", border:"2px solid #060810",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                cursor:"pointer", fontSize:12 }}>
+              {uploadingAvatar ? "…" : "📷"}
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*"
+              onChange={handleAvatarUpload} style={{ display:"none" }}/>
           </div>
-          <button onClick={editing?save:()=>setEdit(true)} style={{ ...A.btnPrimary,padding:"8px 14px",fontSize:12,opacity:saving?0.6:1 }}>
+
+          <div style={{ flex:1 }}>
+            {editing ? (
+              <input value={pseudo} onChange={e=>setPseudo(e.target.value)}
+                style={{ ...A.inp, marginBottom:8, fontSize:18, fontWeight:700 }}/>
+            ) : (
+              <div style={{ fontSize:20, fontWeight:800, color:"#f0f0f0", marginBottom:4 }}>
+                {profile?.username}
+              </div>
+            )}
+            <div style={{ fontSize:12, color:"#444" }}>{session.user.email}</div>
+            {profile?.is_formateur && (
+              <div style={{ marginTop:6, fontSize:12, color:"#f59e0b" }}>⭐ Formateur certifié</div>
+            )}
+          </div>
+
+          <button onClick={editing?save:()=>setEdit(true)} className="btn-primary"
+            style={{ ...A.btnPrimary, padding:"8px 14px", fontSize:12, opacity:saving?0.6:1 }}>
             {editing?(saving?"Sauvegarde…":"Sauvegarder"):"Modifier"}
           </button>
         </div>
 
-        {editing?(
+        {editing ? (
           <><label style={A.lbl}>Bio</label>
-          <textarea value={bio} onChange={e=>setBio(e.target.value)} style={{ ...A.inp,height:80,resize:"vertical" }} placeholder="Parle-toi en quelques mots…"/></>
-        ):(
-          <div style={{ fontSize:13,color:"#777",lineHeight:1.6 }}>{profile?.bio||"Aucune bio renseignée."}</div>
+          <textarea value={bio} onChange={e=>setBio(e.target.value)}
+            style={{ ...A.inp, height:80, resize:"vertical" }}
+            placeholder="Parle-toi en quelques mots…"/></>
+        ) : (
+          <div style={{ fontSize:13, color:"#777", lineHeight:1.6 }}>
+            {profile?.bio || "Aucune bio renseignée."}
+          </div>
         )}
       </div>
 
       {/* stats */}
-      <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:20 }}>
         {[["Analyses",stats.analyses,"📊"],["Indicateurs",stats.indicators,"📐"],["Likes reçus",stats.likes,"♥"]].map(([l,v,ic])=>(
-          <div key={l} style={{ ...A.card,textAlign:"center",padding:16 }}>
-            <div style={{ fontSize:24,marginBottom:6 }}>{ic}</div>
-            <div style={{ fontSize:24,fontWeight:900,color:"#f0f0f0" }}>{v}</div>
-            <div style={{ fontSize:11,color:"#444",marginTop:2 }}>{l}</div>
+          <div key={l} className="ltaf-card" style={{ ...A.card, textAlign:"center", padding:16 }}>
+            <div style={{ fontSize:24, marginBottom:6 }}>{ic}</div>
+            <div style={{ fontSize:24, fontWeight:900, color:"#f0f0f0" }}>{v}</div>
+            <div style={{ fontSize:11, color:"#444", marginTop:2 }}>{l}</div>
           </div>
         ))}
       </div>
 
       {/* recent posts */}
-      <div style={A.card}>
-        <div style={{ fontSize:10,color:"#444",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14 }}>Mes dernières analyses</div>
+      <div className="ltaf-card" style={A.card}>
+        <div style={{ fontSize:9, color:"#444", letterSpacing:"0.18em", textTransform:"uppercase",
+          marginBottom:14, fontWeight:600 }}>Mes dernières analyses</div>
         {myPosts.length===0
-          ?<div style={{ color:"#444",fontSize:13 }}>Aucune analyse publiée.</div>
-          :myPosts.map(p=>(
-            <div key={p.id} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
-              <div style={{ fontSize:13,color:"#ccc",fontWeight:500 }}>{p.title}</div>
-              <div style={{ display:"flex",alignItems:"center",gap:5,color:"#555",fontSize:12,flexShrink:0 }}>
+          ? <div style={{ color:"#444", fontSize:13 }}>Aucune analyse publiée.</div>
+          : myPosts.map(p=>(
+            <div key={p.id} style={{ display:"flex", justifyContent:"space-between",
+              alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ fontSize:13, color:"#ccc", fontWeight:500 }}>{p.title}</div>
+              <div style={{ display:"flex", alignItems:"center", gap:5, color:"#555", fontSize:12, flexShrink:0 }}>
                 <span>♥</span><span>{p.likes?.length||0}</span>
               </div>
             </div>
@@ -807,7 +876,7 @@ function CourseCard({ cours, onOpen }) {
   const levelColors = { "Débutant":"#16a34a","Intermédiaire":"#f59e0b","Avancé":"#dc2626" };
   const lc = levelColors[cours.level] || "#2563eb";
   return (
-    <div onClick={()=>onOpen(cours)} style={{ ...A.card, cursor:"pointer", transition:"border-color 0.15s",
+    <div onClick={()=>onOpen(cours)} className="ltaf-card" style={{ ...A.card, cursor:"pointer", transition:"border-color 0.15s",
       borderColor:"rgba(255,255,255,0.06)" }}
       onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(37,99,235,0.4)"}
       onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
@@ -826,7 +895,7 @@ function CourseCard({ cours, onOpen }) {
         {cours.category&&<Tag label={cours.category} color="#6366f1"/>}
         {cours.video_url&&<Tag label="📹 Vidéo" color="#0891b2"/>}
       </div>
-      <div style={{ fontWeight:700,fontSize:15,color:"#f0f0f0",marginBottom:8,lineHeight:1.4 }}>{cours.title}</div>
+      <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:15,color:"#e8dcc8",marginBottom:8,lineHeight:1.3 }}>{cours.title}</div>
       <div style={{ fontSize:13,color:"#777",lineHeight:1.6,marginBottom:14,
         display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden" }}>
         {cours.description}
@@ -834,7 +903,7 @@ function CourseCard({ cours, onOpen }) {
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",
         paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.05)" }}>
         <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-          <Avatar username={cours.profiles?.username} color={cours.profiles?.avatar_color} size={26}/>
+          <Avatar username={cours.profiles?.username} color={cours.profiles?.avatar_color} size={26} avatarUrl={cours.profiles?.avatar_url}/>
           <div>
             <div style={{ fontSize:12,color:"#bbb",fontWeight:600 }}>{cours.profiles?.username}</div>
             {cours.profiles?.is_formateur&&<div style={{ fontSize:10,color:"#f59e0b" }}>⭐ Formateur</div>}
@@ -862,7 +931,7 @@ function CourseDetail({ cours, onClose, onDelete, currentUserId }) {
         </div>
 
         <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:18,paddingBottom:18,borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
-          <Avatar username={cours.profiles?.username} color={cours.profiles?.avatar_color} size={36}/>
+          <Avatar username={cours.profiles?.username} color={cours.profiles?.avatar_color} size={36} avatarUrl={cours.profiles?.avatar_url}/>
           <div>
             <div style={{ fontWeight:700,color:"#e8e8e8",fontSize:13 }}>{cours.profiles?.username}</div>
             {cours.profiles?.is_formateur&&<div style={{ fontSize:11,color:"#f59e0b" }}>⭐ Formateur certifié</div>}
@@ -980,7 +1049,7 @@ function CoursView({ session, profile }) {
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,gap:10,flexWrap:"wrap" }}>
         <div style={{ fontSize:13,color:"#555" }}>{filtered.length} cours disponible{filtered.length!==1?"s":""}</div>
         {isFormateur&&(
-          <button onClick={()=>setShowForm(true)} style={A.btnPrimary}>
+          <button onClick={()=>setShowForm(true)} className="btn-primary" style={A.btnPrimary}>
             <span style={{ fontSize:18,lineHeight:1 }}>+</span> Publier un cours
           </button>
         )}
@@ -1005,7 +1074,7 @@ function CoursView({ session, profile }) {
 
       {/* badge formateur info pour les non-formateurs */}
       {!isFormateur&&(
-        <div style={{ ...A.card,marginBottom:20,background:"rgba(245,158,11,0.06)",borderColor:"rgba(245,158,11,0.2)" }}>
+        <div className="ltaf-card" style={{ ...A.card,marginBottom:20,background:"rgba(245,158,11,0.06)",borderColor:"rgba(245,158,11,0.2)" }}>
           <div style={{ display:"flex",gap:12,alignItems:"center" }}>
             <span style={{ fontSize:24 }}>⭐</span>
             <div>
@@ -1083,7 +1152,7 @@ function CoursView({ session, profile }) {
               onUploaded={url=>setForm({...form,file_url:url})} uploaded={form.file_url}/>
 
             <button onClick={submit} disabled={posting||!form.title.trim()||!form.body.trim()}
-              style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.title.trim()||!form.body.trim())?0.5:1 }}>
+              className="btn-primary" style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.title.trim()||!form.body.trim())?0.5:1 }}>
               {posting?"Publication…":"Publier le cours"}
             </button>
           </div>
@@ -1104,12 +1173,12 @@ function StrategieCard({ strat, currentUserId, onLike, onDelete, onOpen }) {
   const liked = strat.user_liked;
   const typeColor = { "Scalping":"#f87171","Day Trading":"#fb923c","Swing":"#a3e635","Position":"#60a5fa","Price Action":"#c084fc","ICT / SMC":"#f59e0b" }[strat.type]||"#888";
   return (
-    <div onClick={()=>onOpen(strat)} style={{ ...A.card, cursor:"pointer", transition:"border-color 0.15s" }}
+    <div onClick={()=>onOpen(strat)} className="ltaf-card" style={{ ...A.card, cursor:"pointer", transition:"border-color 0.15s" }}
       onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(37,99,235,0.4)"}
       onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.06)"}>
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12 }}>
         <div style={{ display:"flex",gap:10,alignItems:"center" }}>
-          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color}/>
+          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color} avatarUrl={strat.profiles?.avatar_url}/>
           <div>
             <div style={{ fontWeight:700,color:"#f0f0f0",fontSize:14 }}>{strat.profiles?.username||"Anonyme"}</div>
             <div style={{ fontSize:11,color:"#444",marginTop:2 }}>{timeAgo(strat.created_at)}</div>
@@ -1120,7 +1189,7 @@ function StrategieCard({ strat, currentUserId, onLike, onDelete, onOpen }) {
           {strat.timeframe&&<Tag label={strat.timeframe} color="#6366f1"/>}
         </div>
       </div>
-      <div style={{ fontWeight:700,fontSize:15,color:"#f0f0f0",marginBottom:8 }}>{strat.name}</div>
+      <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:15,color:"#e8dcc8",marginBottom:8 }}>{strat.name}</div>
       <div style={{ fontSize:13,color:"#777",lineHeight:1.6,marginBottom:12,
         display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden" }}>
         {strat.description}
@@ -1135,7 +1204,7 @@ function StrategieCard({ strat, currentUserId, onLike, onDelete, onOpen }) {
         onClick={e=>e.stopPropagation()}>
         <button onClick={()=>onLike(strat.id, strat.user_liked)}
           style={{ background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",
-            gap:5,color:liked?"#f87171":"#555",fontSize:13,fontFamily:"inherit",padding:0 }}>
+            gap:5,color:liked?"#c9a227":"#3a3020",fontSize:13,fontFamily:"inherit",padding:0 }}>
           <span style={{ fontSize:17 }}>{liked?"♥":"♡"}</span><span>{strat.like_count||0}</span>
         </button>
         {strat.user_id===currentUserId&&(
@@ -1167,7 +1236,7 @@ function StrategieDetail({ strat, onClose }) {
         </div>
 
         <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:18,paddingBottom:18,borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
-          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color} size={36}/>
+          <Avatar username={strat.profiles?.username} color={strat.profiles?.avatar_color} size={36} avatarUrl={strat.profiles?.avatar_url}/>
           <div>
             <div style={{ fontWeight:700,color:"#e8e8e8",fontSize:13 }}>{strat.profiles?.username}</div>
             <div style={{ fontSize:11,color:"#444" }}>{timeAgo(strat.created_at)}</div>
@@ -1286,7 +1355,7 @@ function StrategiesView({ session }) {
     <div>
       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,gap:10,flexWrap:"wrap" }}>
         <div style={{ fontSize:13,color:"#555" }}>{filtered.length} stratégie{filtered.length!==1?"s":""}</div>
-        <button onClick={()=>setShowForm(true)} style={A.btnPrimary}>
+        <button onClick={()=>setShowForm(true)} className="btn-primary" style={A.btnPrimary}>
           <span style={{ fontSize:18,lineHeight:1 }}>+</span> Partager une stratégie
         </button>
       </div>
@@ -1384,7 +1453,7 @@ function StrategiesView({ session }) {
               style={{ ...A.inp,marginBottom:16 }} placeholder="ou coller un lien…"/>
 
             <button onClick={submit} disabled={posting||!form.name.trim()||!form.description.trim()}
-              style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.name.trim()||!form.description.trim())?0.5:1 }}>
+              className="btn-primary" style={{ ...A.btnPrimary,width:"100%",justifyContent:"center",opacity:(posting||!form.name.trim()||!form.description.trim())?0.5:1 }}>
               {posting?"Publication…":"Partager la stratégie"}
             </button>
           </div>
@@ -1435,77 +1504,76 @@ export default function App() {
   if (!session) return <AuthScreen/>;
 
   return (
-    <div style={{ display:"flex", minHeight:"100vh", background:"#060810", fontFamily:"Inter,sans-serif", color:"#c0c0c0" }}>
+    <div style={{ display:"flex", minHeight:"100vh", background:"#050508", fontFamily:"'DM Sans',sans-serif", color:"#9a8a6a" }}>
 
       {/* ── mobile topbar ── */}
       <div style={{ display:"none", position:"fixed",top:0,left:0,right:0,zIndex:60,
-        background:"#0a0d14",borderBottom:"1px solid rgba(255,255,255,0.06)",
-        padding:"12px 16px",alignItems:"center",justifyContent:"space-between",
+        background:"#06060a",borderBottom:"1px solid rgba(212,175,55,0.1)",
+        padding:"12px 18px",alignItems:"center",justifyContent:"space-between",
         ...(typeof window!=="undefined"&&window.innerWidth<=768?{ display:"flex" }:{}) }}
         className="mobile-topbar">
         <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-          <div style={{ width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#002395,#ED2939)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16 }}>🇫🇷</div>
-          <span style={{ fontWeight:800,fontSize:13,color:"#f0f0f0" }}>LTAF</span>
+          <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:14,color:"#e8dcc8" }}>Le Trading <span style={{ fontStyle:"italic",color:"#c9a227" }}>à la Française</span></div>
         </div>
-        <button onClick={()=>setMenu(o=>!o)} style={{ background:"none",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#bbb",padding:"6px 10px",cursor:"pointer",fontSize:16,fontFamily:"inherit" }}>☰</button>
+        <button onClick={()=>setMenu(o=>!o)} style={{ background:"none",border:"1px solid rgba(212,175,55,0.15)",borderRadius:2,color:"#c9a227",padding:"6px 11px",cursor:"pointer",fontSize:15,fontFamily:"inherit" }}>☰</button>
       </div>
 
       {menuOpen&&(
-        <div style={{ position:"fixed",top:58,left:0,right:0,zIndex:59,background:"#0a0d14",borderBottom:"1px solid rgba(255,255,255,0.08)",padding:"8px 12px",display:"flex",flexDirection:"column",gap:4 }}
+        <div style={{ position:"fixed",top:54,left:0,right:0,zIndex:59,background:"#06060a",borderBottom:"1px solid rgba(212,175,55,0.1)",padding:"8px 12px",display:"flex",flexDirection:"column",gap:2 }}
           className="mobile-menu">
           {NAV.map(n=><button key={n.id} onClick={()=>go(n.id)} style={{ ...A.navBtn,width:"100%",...(view===n.id?A.navActive:{}) }}>{n.icon} {n.label}</button>)}
-          <button onClick={logout} style={{ ...A.navBtn,color:"#f87171",marginTop:4 }}>→ Déconnexion</button>
+          <button onClick={logout} style={{ ...A.navBtn,color:"#8a3a3a",marginTop:4,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase" }}>— Déconnexion</button>
         </div>
       )}
 
       {/* ── sidebar ── */}
-      <aside style={{ width:240,background:"#0a0d14",borderRight:"1px solid rgba(255,255,255,0.05)",display:"flex",flexDirection:"column",position:"sticky",top:0,height:"100vh",flexShrink:0 }} className="desktop-sidebar">
+      <aside style={{ width:240,background:"#06060a",borderRight:"1px solid rgba(212,175,55,0.08)",display:"flex",flexDirection:"column",position:"sticky",top:0,height:"100vh",flexShrink:0 }} className="desktop-sidebar">
         {/* logo */}
-        <div style={{ padding:"24px 20px 20px",borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
-          <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:14 }}>
-            <div style={{ width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#002395,#ED2939)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>🇫🇷</div>
-            <div>
-              <div style={{ fontWeight:900,fontSize:13,color:"#f0f0f0",lineHeight:1.2 }}>Le Trading</div>
-              <div style={{ fontWeight:900,fontSize:13,color:"#f0f0f0",lineHeight:1.2 }}>à la Française</div>
+        <div style={{ padding:"28px 20px 24px",borderBottom:"1px solid rgba(212,175,55,0.08)" }}>
+          <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:9,color:"#3a3020",letterSpacing:"0.25em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif",marginBottom:10 }}>La Communauté</div>
+            <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:17,color:"#e8dcc8",lineHeight:1.25,letterSpacing:"-0.3px" }}>
+              Le Trading
+            </div>
+            <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:400,fontStyle:"italic",fontSize:17,color:"#c9a227",lineHeight:1.25,letterSpacing:"-0.3px" }}>
+              à la Française
             </div>
           </div>
-          <div style={{ display:"flex",gap:3 }}>
-            {["#002395","#FFFFFF","#ED2939"].map((c,i)=><div key={i} style={{ flex:1,height:3,borderRadius:99,background:c,border:c==="#FFFFFF"?"1px solid rgba(255,255,255,0.15)":"none" }}/>)}
-          </div>
+          <div className="tricolor-bar" style={{ opacity:0.7 }}/>
         </div>
 
         {/* nav */}
         <nav style={{ padding:"12px 10px",flex:1 }}>
           {NAV.map(n=>(
             <button key={n.id} onClick={()=>setView(n.id)}
-              style={{ ...A.navBtn,width:"100%",marginBottom:2,...(view===n.id?A.navActive:{}) }}>
+              className={`nav-btn-hover`} style={{ ...A.navBtn,width:"100%",marginBottom:4,...(view===n.id?A.navActive:{}) }}>
               <span style={{ fontSize:16 }}>{n.icon}</span>{n.label}
             </button>
           ))}
         </nav>
 
         {/* user */}
-        <div style={{ padding:"16px",borderTop:"1px solid rgba(255,255,255,0.05)" }}>
-          <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
-            <Avatar username={profile?.username} color={profile?.avatar_color} size={36}/>
+        <div style={{ padding:"16px 20px",borderTop:"1px solid rgba(212,175,55,0.08)" }}>
+          <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:14 }}>
+            <Avatar username={profile?.username} color={profile?.avatar_color} size={34} avatarUrl={profile?.avatar_url}/>
             <div style={{ minWidth:0 }}>
-              <div style={{ fontWeight:600,fontSize:13,color:"#e8e8e8",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{profile?.username||"…"}</div>
-              <div style={{ fontSize:11,color:"#444",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{session.user.email}</div>
+              <div style={{ fontWeight:600,fontSize:12,color:"#c8b878",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'DM Sans',sans-serif" }}>{profile?.username||"…"}</div>
+              <div style={{ fontSize:10,color:"#3a3020",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:2 }}>{session.user.email}</div>
             </div>
           </div>
-          <button onClick={logout} style={{ width:"100%",padding:"8px 0",borderRadius:8,background:"rgba(248,113,113,0.08)",border:"1px solid rgba(248,113,113,0.2)",color:"#f87171",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600 }}>
+          <button onClick={logout} style={{ width:"100%",padding:"8px 0",borderRadius:2,background:"transparent",border:"1px solid rgba(212,175,55,0.12)",color:"#4a4535",fontSize:10,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:600,letterSpacing:"0.1em",textTransform:"uppercase",transition:"all 0.15s" }}>
             Déconnexion
           </button>
         </div>
       </aside>
 
       {/* ── main content ── */}
-      <main style={{ flex:1,padding:"28px 24px",overflowY:"auto",maxWidth:800 }} className="main-content">
+      <main style={{ flex:1,padding:"28px 28px",overflowY:"auto",maxWidth:820 }} className="main-content">
         <div style={{ marginBottom:24 }}>
-          <div style={{ fontWeight:900,fontSize:22,color:"#f0f0f0",letterSpacing:"-0.5px" }}>
+          <div style={{ fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:26,color:"#e8dcc8",letterSpacing:"-0.5px" }}>
             {NAV.find(n=>n.id===view)?.icon} {NAV.find(n=>n.id===view)?.label}
           </div>
-          <div style={{ fontSize:12,color:"#444",marginTop:4 }}>
+          <div style={{ fontSize:11,color:"#3a3020",marginTop:5,letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif" }}>
             {new Date().toLocaleDateString("fr-FR",{ weekday:"long",day:"numeric",month:"long",year:"numeric" })}
           </div>
         </div>
@@ -1520,24 +1588,29 @@ export default function App() {
 
       {/* ── right sidebar (desktop) ── */}
       <aside style={{ width:260,padding:"28px 16px",flexShrink:0 }} className="right-sidebar">
-        <div style={A.card}>
-          <div style={{ fontSize:10,color:"#444",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14 }}>Communauté</div>
-          <div style={{ fontSize:13,color:"#666",lineHeight:1.7 }}>
-            Bienvenue sur <strong style={{ color:"#e8e8e8" }}>Le Trading à la Française</strong> 🇫🇷<br/>
-            Partage tes analyses, discute en temps réel et découvre les indicateurs de la communauté.
+        <div className="ltaf-card" style={{ ...A.card,overflow:"hidden" }} className="ltaf-card">
+          <div style={{ position:"absolute",top:0,left:0,right:0 }}><div className="tricolor-bar" style={{ opacity:0.5 }}/></div>
+          <div style={{ fontSize:9,color:"#3a3020",letterSpacing:"0.18em",textTransform:"uppercase",marginBottom:12,marginTop:4 }}>Communauté</div>
+          <div style={{ fontFamily:"'Playfair Display',serif",fontSize:14,color:"#c8b878",lineHeight:1.7,marginBottom:12 }}>
+            Bienvenue sur <em>Le Trading à la Française</em> 🇫🇷
           </div>
-          <div style={{ marginTop:14,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",gap:3 }}>
-            {["#002395","#FFFFFF","#ED2939"].map((c,i)=><div key={i} style={{ flex:1,height:4,borderRadius:99,background:c,border:c==="#FFFFFF"?"1px solid rgba(255,255,255,0.15)":"none" }}/>)}
+          <div style={{ fontSize:12,color:"#4a4535",lineHeight:1.8 }}>
+            Partage tes analyses, discute en temps réel et découvre les indicateurs de la communauté.
           </div>
         </div>
 
-        <div style={{ ...A.card,marginTop:14 }}>
-          <div style={{ fontSize:10,color:"#444",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14 }}>Règles de la communauté</div>
-          {["Respecte les autres membres","Partage des analyses construites","Pas de spam ni pub","Aide les débutants","Bonne ambiance avant tout"].map((r,i)=>(
-            <div key={i} style={{ display:"flex",gap:8,marginBottom:8,fontSize:12,color:"#666",alignItems:"flex-start" }}>
-              <span style={{ color:"#2563eb",flexShrink:0 }}>›</span>{r}
+        <div className="ltaf-card" style={{ ...A.card,marginTop:12 }} className="ltaf-card">
+          <div style={{ fontSize:9,color:"#3a3020",letterSpacing:"0.18em",textTransform:"uppercase",marginBottom:14 }}>Règles</div>
+          {["Respecte les autres membres","Partage des analyses solides","Pas de spam ni pub","Aide les débutants","Bonne ambiance avant tout"].map((r,i)=>(
+            <div key={i} style={{ display:"flex",gap:10,marginBottom:10,fontSize:12,color:"#4a4535",alignItems:"flex-start",lineHeight:1.5 }}>
+              <span style={{ color:"#c9a227",flexShrink:0,fontSize:14,lineHeight:1.2 }}>—</span>{r}
             </div>
           ))}
+        </div>
+
+        <div style={{ marginTop:12,padding:"14px 16px",border:"1px solid rgba(212,175,55,0.1)",borderRadius:2,background:"rgba(201,162,39,0.04)" }}>
+          <div style={{ fontSize:9,color:"#3a3020",letterSpacing:"0.18em",textTransform:"uppercase",marginBottom:8 }}>Marché en direct</div>
+          <div style={{ fontSize:11,color:"#4a4535",fontFamily:"'DM Sans',sans-serif" }}>Données temps réel disponibles via TradingView</div>
         </div>
       </aside>
     </div>
@@ -1545,39 +1618,106 @@ export default function App() {
 }
 
 /* ─────────────────────────────────────────────
-   STYLES
+   STYLES — Luxury Editorial
 ───────────────────────────────────────────── */
 const A = {
-  card: { background:"#0e1219",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:20,marginBottom:0 },
-  inp: { width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:9,padding:"10px 12px",color:"#e8e8e8",fontSize:13,fontFamily:"Inter,sans-serif",boxSizing:"border-box",outline:"none" },
-  lbl: { fontSize:10,color:"#555",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6,fontFamily:"Inter,sans-serif" },
-  btnPrimary: { display:"flex",alignItems:"center",gap:6,background:"#1d4ed8",color:"#fff",border:"none",borderRadius:9,padding:"10px 18px",fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"Inter,sans-serif",flexShrink:0,whiteSpace:"nowrap" },
-  linkBtn: { background:"none",border:"none",color:"#3b82f6",fontSize:13,cursor:"pointer",fontFamily:"Inter,sans-serif",padding:0 },
-  navBtn: { display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:9,background:"none",border:"none",color:"#555",cursor:"pointer",fontSize:13,fontFamily:"Inter,sans-serif",fontWeight:500,textAlign:"left" },
-  navActive: { background:"rgba(37,99,235,0.12)",color:"#60a5fa" },
-  pill: { padding:"7px 14px",borderRadius:99,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"#777",fontSize:12,cursor:"pointer",fontFamily:"Inter,sans-serif",fontWeight:500 },
-  pillActive: { background:"rgba(37,99,235,0.15)",borderColor:"rgba(37,99,235,0.4)",color:"#60a5fa" },
-  select: { background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:9,padding:"8px 12px",color:"#bbb",fontSize:12,fontFamily:"Inter,sans-serif",cursor:"pointer",outline:"none" },
-  overlay: { position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:16 },
-  modal: { background:"#0e1219",border:"1px solid rgba(255,255,255,0.1)",borderRadius:16,padding:28,width:"100%",maxHeight:"92vh",overflowY:"auto" },
+  card: { background:"#08090f",border:"1px solid rgba(212,175,55,0.12)",borderRadius:2,padding:24,marginBottom:0,position:"relative" },
+  inp: { width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(212,175,55,0.15)",borderRadius:2,padding:"11px 14px",color:"#e8dcc8",fontSize:13,fontFamily:"'DM Sans',sans-serif",boxSizing:"border-box",outline:"none",transition:"border-color 0.2s" },
+  lbl: { fontSize:9,color:"#4a4535",letterSpacing:"0.18em",textTransform:"uppercase",display:"block",marginBottom:7,fontFamily:"'DM Sans',sans-serif",fontWeight:600 },
+  btnPrimary: { display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,#c9a227,#e8c84a)",color:"#0a0a0f",border:"none",borderRadius:2,padding:"11px 20px",fontWeight:700,fontSize:12,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",flexShrink:0,whiteSpace:"nowrap",letterSpacing:"0.05em",textTransform:"uppercase" },
+  linkBtn: { background:"none",border:"none",color:"#c9a227",fontSize:12,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",padding:0,letterSpacing:"0.03em" },
+  navBtn: { display:"flex",alignItems:"center",gap:10,padding:"11px 14px",borderRadius:2,background:"none",border:"none",color:"#4a4535",cursor:"pointer",fontSize:12,fontFamily:"'DM Sans',sans-serif",fontWeight:500,textAlign:"left",letterSpacing:"0.03em",transition:"all 0.15s" },
+  navActive: { background:"rgba(201,162,39,0.08)",color:"#c9a227",borderLeft:"2px solid #c9a227" },
+  pill: { padding:"7px 16px",borderRadius:2,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(212,175,55,0.15)",color:"#6b6040",fontSize:11,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase" },
+  pillActive: { background:"rgba(201,162,39,0.1)",borderColor:"rgba(201,162,39,0.5)",color:"#c9a227" },
+  select: { background:"rgba(255,255,255,0.03)",border:"1px solid rgba(212,175,55,0.15)",borderRadius:2,padding:"9px 12px",color:"#9a8a6a",fontSize:12,fontFamily:"'DM Sans',sans-serif",cursor:"pointer",outline:"none" },
+  overlay: { position:"fixed",inset:0,background:"rgba(4,4,8,0.93)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:16 },
+  modal: { background:"#08090f",border:"1px solid rgba(212,175,55,0.2)",borderRadius:2,padding:32,width:"100%",maxHeight:"92vh",overflowY:"auto" },
 };
 
 /* inject global css */
 const css = document.createElement("style");
 css.textContent = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
   * { box-sizing: border-box; }
-  body { margin: 0; background: #060810; }
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
-  select option { background: #0e1219; }
-  input, select, textarea { color-scheme: dark; }
-  @media (max-width: 900px) {
-    .right-sidebar { display: none !important; }
+  body { margin: 0; background: #050508; font-family: 'DM Sans', sans-serif; }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
   }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius: 99px; }
+
+  select option { background: #08090f; color: #e8dcc8; }
+  input, select, textarea { color-scheme: dark; }
+
+  input:focus, textarea:focus {
+    border-color: rgba(201,162,39,0.45) !important;
+    box-shadow: 0 0 0 3px rgba(201,162,39,0.07) !important;
+  }
+
+  .btn-primary {
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(201,162,39,0.3) !important;
+    background: linear-gradient(135deg,#e0b430,#f5d55a) !important;
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .ltaf-card {
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .ltaf-card:hover {
+    border-color: rgba(212,175,55,0.28) !important;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(212,175,55,0.08);
+  }
+
+  .nav-btn-hover:hover {
+    color: #9a8a6a !important;
+    background: rgba(201,162,39,0.05) !important;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .animate-in { animation: fadeUp 0.4s ease forwards; }
+
+  @keyframes goldShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .gold-text {
+    background: linear-gradient(90deg, #c9a227 0%, #f0d060 40%, #c9a227 80%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldShimmer 5s linear infinite;
+  }
+
+  .tricolor-bar {
+    height: 2px;
+    background: linear-gradient(90deg, #002395 33.33%, #ffffff 33.33% 66.66%, #ED2939 66.66%);
+    width: 100%;
+  }
+
+  .playfair { font-family: 'Playfair Display', serif; }
+
+  @media (max-width: 900px) { .right-sidebar { display: none !important; } }
   @media (max-width: 640px) {
     .desktop-sidebar { display: none !important; }
     .mobile-topbar { display: flex !important; }
-    .main-content { padding: 80px 14px 24px !important; max-width: 100% !important; }
+    .main-content { padding: 76px 14px 24px !important; max-width: 100% !important; }
   }
 `;
 document.head.appendChild(css);
