@@ -1,29 +1,464 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Le Trading à la Française</title>
-    <meta name="description" content="La communauté française des traders — analyses, chat, indicateurs, cours."/>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDGE Journal — ICT/SMC Trading Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080b0f; --surface: #0d1117; --border: #1a2332;
+    --accent: #00d4a8; --accent2: #ff6b35; --text: #e8edf5;
+    --muted: #5a6a7a; --card: #0f1822;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow-x: hidden; }
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json"/>
-    <meta name="theme-color" content="#060810"/>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="apple-mobile-web-app-title" content="LTAF"/>
-    <link rel="apple-touch-icon" href="/icon-192.png"/>
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(8,11,15,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .nav-tag {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted);
+    border: 1px solid var(--border); padding: 0.3rem 0.8rem; border-radius: 2rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .cta-nav {
+    background: var(--accent); color: #000; font-weight: 700; font-size: 0.85rem;
+    padding: 0.6rem 1.4rem; border-radius: 0.3rem; text-decoration: none;
+    letter-spacing: 0.02em; transition: all 0.2s;
+  }
+  .cta-nav:hover { background: #00f5c4; transform: translateY(-1px); }
 
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
-    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png"/>
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 2rem 4rem; position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(0,212,168,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,212,168,0.08); border: 1px solid rgba(0,212,168,0.25);
+    color: var(--accent); font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.1em;
+    padding: 0.4rem 1rem; border-radius: 2rem; margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  h1 {
+    font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 800;
+    line-height: 1.05; letter-spacing: -0.04em; max-width: 900px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 .accent { color: var(--accent); }
+
+  .hero-sub {
+    margin-top: 1.5rem; font-family: 'DM Mono', monospace;
+    font-weight: 300; font-size: 1.05rem; color: var(--muted);
+    max-width: 600px; line-height: 1.7; animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .stats-bar {
+    display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+    margin-top: 3rem; animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.03em; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem; }
+
+  /* TICKER */
+  .ticker-wrap {
+    width: 100%; overflow: hidden;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 0.7rem 0; background: var(--surface);
+  }
+  .ticker {
+    display: flex; gap: 4rem; white-space: nowrap;
+    animation: scroll 20s linear infinite;
+    font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em;
+  }
+  .ticker span { color: var(--accent); }
+  @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* FEATURES */
+  .section { padding: 6rem 4rem; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+  .section-title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+  .section-desc { font-family: 'DM Mono', monospace; color: var(--muted); font-weight: 300; font-size: 0.95rem; line-height: 1.7; max-width: 540px; margin-bottom: 3rem; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 0.8rem; padding: 1.8rem; transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(0,212,168,0.3); transform: translateY(-3px); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+  .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .feature-desc { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+  .tag-chip {
+    display: inline-block; background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.25);
+    color: var(--accent2); font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 0.2rem;
+    letter-spacing: 0.08em; margin-top: 0.8rem;
+  }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 0.8rem; padding: 2rem; }
+  .price-card.featured { border-color: var(--accent); background: linear-gradient(135deg, rgba(0,212,168,0.05) 0%, var(--card) 60%); }
+  .price-tier { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.8rem; }
+  .price-tier.hot { color: var(--accent); }
+  .price-amount { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.3rem; }
+  .price-amount sup { font-size: 1rem; font-weight: 400; color: var(--muted); }
+  .price-period { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .price-features { list-style: none; }
+  .price-features li {
+    font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted);
+    padding: 0.4rem 0; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.6rem; font-weight: 300;
+  }
+  .price-features li::before { content: '✓'; color: var(--accent); font-size: 0.9rem; }
+  .price-features li.off { opacity: 0.4; }
+  .price-features li.off::before { content: '×'; color: var(--muted); }
+  .btn-plan {
+    display: block; text-align: center; margin-top: 1.5rem; padding: 0.75rem;
+    border-radius: 0.4rem; font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.9rem; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;
+  }
+  .btn-plan.primary { background: var(--accent); color: #000; }
+  .btn-plan.primary:hover { box-shadow: 0 8px 20px rgba(0,212,168,0.25); transform: translateY(-1px); }
+  .btn-plan.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-plan.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* WAITLIST */
+  .waitlist-section { max-width: 600px; margin: 0 auto; text-align: center; padding: 6rem 2rem; }
+  .waitlist-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 1rem; padding: 3rem; position: relative; overflow: hidden;
+  }
+  .waitlist-box::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(0,212,168,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .waitlist-box h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.8rem; }
+  .waitlist-box p { font-family: 'DM Mono', monospace; color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; font-weight: 300; }
+
+  /* FORM */
+  .input-row { display: flex; gap: 0.8rem; }
+  .email-input {
+    flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.9rem;
+    padding: 0.75rem 1rem; border-radius: 0.4rem; outline: none; transition: border-color 0.2s;
+  }
+  .email-input:focus { border-color: var(--accent); }
+  .email-input::placeholder { color: var(--muted); }
+  .email-input.error { border-color: rgba(255,77,109,0.5); }
+  .btn-waitlist {
+    background: var(--accent); color: #000; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.9rem; padding: 0.75rem 1.4rem;
+    border-radius: 0.4rem; border: none; cursor: pointer;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .btn-waitlist:hover:not(:disabled) { background: #00f5c4; }
+  .btn-waitlist:disabled { opacity: 0.6; cursor: not-allowed; }
+  .waitlist-note { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-top: 1rem; font-weight: 300; }
+  .error-msg { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #ff4d6d; margin-top: 0.5rem; text-align: left; }
+  .success-box {
+    display: flex; align-items: center; gap: 1rem;
+    background: rgba(0,212,168,0.08); border: 1px solid rgba(0,212,168,0.25);
+    border-radius: 0.6rem; padding: 1.2rem 1.5rem;
+  }
+  .success-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,212,168,0.15); border: 1px solid rgba(0,212,168,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .success-text { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--accent); font-weight: 400; text-align: left; }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 2rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted);
+    flex-wrap: wrap; gap: 1rem;
+  }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-tag { display: none; }
+    .section { padding: 4rem 1.5rem; }
+    .input-row { flex-direction: column; }
+    footer { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">EDGE<span>.</span></div>
+  <div class="nav-tag">ICT / SMC Journal</div>
+  <a href="#waitlist" class="cta-nav">Rejoindre la waitlist</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="badge" id="badge-count">Beta bientôt disponible</div>
+  <h1>Le journal de trading<br>fait pour les <span class="accent">traders ICT/SMC</span></h1>
+  <p class="hero-sub">Order blocks, FVG, liquidity sweeps, PD arrays — enfin un journal qui comprend ta stratégie. Track, analyse, et améliore ton edge en temps réel.</p>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">+31%</div><div class="stat-label">Win rate moyen</div></div>
+    <div class="stat"><div class="stat-num">2.4×</div><div class="stat-label">Profit factor</div></div>
+    <div class="stat"><div class="stat-num">ICT</div><div class="stat-label">Méthodologie native</div></div>
+    <div class="stat"><div class="stat-num">0€</div><div class="stat-label">Pour commencer</div></div>
+  </div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>XAUUSD</span> Order Block Detection ·&nbsp;
+    <span>NAS100</span> FVG Tracking ·&nbsp;
+    <span>EURUSD</span> Liquidity Analysis ·&nbsp;
+    ICT Kill Zones ·&nbsp;
+    <span>SMC</span> Bias Dashboard ·&nbsp;
+    Monte Carlo Simulation ·&nbsp;
+    <span>XAUUSD</span> Order Block Detection ·&nbsp;
+    <span>NAS100</span> FVG Tracking ·&nbsp;
+    <span>EURUSD</span> Liquidity Analysis ·&nbsp;
+    ICT Kill Zones ·&nbsp;
+    <span>SMC</span> Bias Dashboard ·&nbsp;
+    Monte Carlo Simulation ·&nbsp;
+  </div>
+</div>
+
+<section class="section" id="features">
+  <div class="section-label">// Features</div>
+  <div class="section-title">Construit par un trader,<br>pour les traders ICT/SMC</div>
+  <p class="section-desc">Pas de features génériques. Chaque outil est pensé pour la méthodologie Inner Circle Trader et Smart Money Concepts.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🧱</div>
+      <div class="feature-title">Tag ICT Natif</div>
+      <div class="feature-desc">Catégorise chaque trade par setup : Order Block, FVG, Liquidity Sweep, SIBI/BISI, PD Array, Breaker Block, Mitigation Block…</div>
+      <div class="tag-chip">ICT NATIVE</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🕐</div>
+      <div class="feature-title">Kill Zone Tracker</div>
+      <div class="feature-desc">Analyse automatique de tes performances par session : Asian Range, London Open, NY AM, NY Lunch. Identifie ta kill zone la plus profitable.</div>
+      <div class="tag-chip">SESSIONS</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Advanced Stats</div>
+      <div class="feature-desc">Profit Factor, Expectancy, Max Drawdown, streaks, R-multiples. Stats institutionnelles avec Monte Carlo pour valider ton edge statiquement.</div>
+      <div class="tag-chip">QUANTITATIF</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <div class="feature-title">Calendar P&L</div>
+      <div class="feature-desc">Vue calendrier avec heat map de tes journées. Identifie tes jours gagnants récurrents et évite de trader les mauvais jours.</div>
+      <div class="tag-chip">VISUALISATION</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📤</div>
+      <div class="feature-title">Import CSV MT4/MT5</div>
+      <div class="feature-desc">Import en un clic depuis MetaTrader 4, MetaTrader 5 ou TradingView. Drag & drop. Tes trades sont parsés automatiquement.</div>
+      <div class="tag-chip">INTÉGRATION</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">Bias & HTF Analysis</div>
+      <div class="feature-desc">Espace de journaling pour noter ton biais HTF, ta narrative du jour, et aligner chaque trade avec le contexte de marché macro.</div>
+      <div class="tag-chip">SMC MINDSET</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="section-label">// Pricing</div>
+  <div class="section-title">Simple. Transparent.<br>Pas de bullshit.</div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Free</div>
+      <div class="price-amount">0<sup>€</sup></div>
+      <div class="price-period">pour toujours</div>
+      <ul class="price-features">
+        <li>50 trades / mois</li>
+        <li>Tags ICT de base</li>
+        <li>Stats essentielles</li>
+        <li class="off">Import CSV illimité</li>
+        <li class="off">Monte Carlo</li>
+        <li class="off">Partage de journal</li>
+      </ul>
+      <a href="#waitlist" class="btn-plan ghost">Commencer gratuit</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-tier hot">⚡ Pro — Le plus populaire</div>
+      <div class="price-amount">19<sup>€/mois</sup></div>
+      <div class="price-period">ou 149€/an — 35% d'économie</div>
+      <ul class="price-features">
+        <li>Trades illimités</li>
+        <li>Tous les tags ICT/SMC</li>
+        <li>Advanced Stats complètes</li>
+        <li>Import CSV illimité</li>
+        <li>Monte Carlo simulation</li>
+        <li>Export PDF rapport</li>
+      </ul>
+      <a href="#waitlist" class="btn-plan primary">Accès anticipé →</a>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">Prop Trader</div>
+      <div class="price-amount">39<sup>€/mois</sup></div>
+      <div class="price-period">multi-comptes prop firms</div>
+      <ul class="price-features">
+        <li>Tout le plan Pro</li>
+        <li>Multi-comptes illimités</li>
+        <li>Rapport de conformité</li>
+        <li>Alertes drawdown prop</li>
+        <li>Partage de journal public</li>
+        <li>Support prioritaire</li>
+      </ul>
+      <a href="#waitlist" class="btn-plan ghost">Contact</a>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<div id="waitlist">
+  <div class="waitlist-section">
+    <div class="waitlist-box">
+      <div class="badge" style="margin: 0 auto 1.5rem; display:inline-flex;">🔒 Accès anticipé</div>
+      <h2>Rejoins la waitlist</h2>
+      <p>Les 200 premiers inscrits obtiennent 3 mois de Pro offerts.<br>Zéro spam. Juste le lancement.</p>
+
+      <div id="form-container">
+        <div class="input-row">
+          <input type="email" id="email-input" class="email-input" placeholder="ton@email.com" />
+          <button class="btn-waitlist" id="submit-btn" onclick="submitWaitlist()">Je veux accès →</button>
+        </div>
+        <div id="error-msg" class="error-msg" style="display:none;"></div>
+        <div class="waitlist-note">✓ <span id="count-label">Rejoins les premiers inscrits</span> · ✓ Annulation à tout moment</div>
+      </div>
+
+      <div id="success-container" style="display:none;">
+        <div class="success-box">
+          <div class="success-icon">✓</div>
+          <div class="success-text">Tu es inscrit(e) ! On te prévient en premier lors du lancement. 🚀</div>
+        </div>
+        <div class="waitlist-note" style="margin-top:1rem;">Partage à un ami trader pour monter dans la liste !</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>EDGE Trading Journal © 2026</div>
+  <div>Construit par un trader, pour les traders.</div>
+  <div style="color: #00d4a8;">ICT · SMC · Smart Money</div>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://gvnpiirgeylbunmrofky.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2bnBpaXJnZXlsYnVubXJvZmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTQ4MDgsImV4cCI6MjA4ODg5MDgwOH0.7wRe4NrColjlQdZ7Tvh3HdFuX_BwEEOcqZS6Gd2RJDQ";
+
+  // Charger le nombre d'inscrits au chargement
+  async function loadCount() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist?select=id`, {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        document.getElementById("count-label").textContent = `${data.length} trader${data.length > 1 ? 's' : ''} déjà inscrit${data.length > 1 ? 's' : ''}`;
+        document.getElementById("badge-count").textContent = `● Beta bientôt disponible — ${data.length} traders en liste`;
+      }
+    } catch(e) {}
+  }
+
+  async function submitWaitlist() {
+    const input = document.getElementById("email-input");
+    const btn   = document.getElementById("submit-btn");
+    const errEl = document.getElementById("error-msg");
+    const email = input.value.trim().toLowerCase();
+
+    // Reset
+    errEl.style.display = "none";
+    input.classList.remove("error");
+
+    // Validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      input.classList.add("error");
+      errEl.textContent = "Adresse email invalide.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "…";
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ email, source: "landing" })
+      });
+
+      if (res.status === 201 || res.status === 200) {
+        document.getElementById("form-container").style.display = "none";
+        document.getElementById("success-container").style.display = "block";
+        loadCount();
+      } else if (res.status === 409 || res.status === 422) {
+        // Email déjà inscrit
+        document.getElementById("form-container").style.display = "none";
+        document.getElementById("success-container").style.display = "block";
+        document.querySelector(".success-text").textContent = "Tu es déjà sur la liste ! On te contacte bientôt. 🎯";
+      } else {
+        throw new Error("Erreur serveur");
+      }
+    } catch(e) {
+      errEl.textContent = "Une erreur est survenue. Réessaie dans un instant.";
+      errEl.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Je veux accès →";
+    }
+  }
+
+  // Soumettre avec Enter
+  document.getElementById("email-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") submitWaitlist();
+  });
+
+  // Charger le compteur au démarrage
+  loadCount();
+</script>
+</body>
 </html>
